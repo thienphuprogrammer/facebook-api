@@ -10,6 +10,7 @@ import {
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard.js';
 import { LoginDto } from './dto/login.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -24,6 +25,7 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Get('profile')
+  @ApiBearerAuth()
   getProfile({ req }: { req: any }) {
     return req.user;
   }
