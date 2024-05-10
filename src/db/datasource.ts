@@ -1,5 +1,6 @@
 import { Env } from '../utils/env';
 import { DataSource } from 'typeorm';
+
 export const datasource = new DataSource({
   type: 'mysql',
   host: Env.DB_HOST,
@@ -12,3 +13,5 @@ export const datasource = new DataSource({
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   migrations: [__dirname + '/../migrations/*{.ts,.js}'],
 });
+
+console.log(datasource.options);

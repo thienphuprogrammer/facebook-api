@@ -3,7 +3,7 @@ import { RoleEnum } from '../../utils/enums';
 import { faker } from '@faker-js/faker';
 
 @Entity()
-export class AccountDetailEntity {
+export class AccountDetail {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -55,7 +55,7 @@ export class AccountDetailEntity {
   role: RoleEnum;
 
   static fakeOne(gender: 'male' | 'female') {
-    const detail = new AccountDetailEntity();
+    const detail = new AccountDetail();
     detail.avatar = faker.image.avatar();
     detail.age = faker.number.int({ min: 18, max: 100 });
     detail.birthday = faker.date.past();

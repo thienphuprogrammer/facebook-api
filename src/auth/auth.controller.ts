@@ -1,14 +1,15 @@
 import {
-  Controller,
-  Post,
   Body,
+  Controller,
+  Get,
   HttpCode,
   HttpStatus,
+  Post,
   UseGuards,
-  Get,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard.js';
+import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -17,7 +18,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('login')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  login(@Body() loginDto: Record<string, any>) {
+  login(@Body() dto: LoginDto) {
     return this.authService.logIn();
   }
 
@@ -25,5 +26,10 @@ export class AuthController {
   @Get('profile')
   getProfile({ req }: { req: any }) {
     return req.user;
+  }
+
+  @Get('login-with-google')
+  loginWithGoogle() {
+    return this.authService.loginWithGoogle();
   }
 }

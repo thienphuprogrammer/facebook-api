@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { faker } from '@faker-js/faker';
-import { AccountDetailEntity } from './account-detail.entity';
+import { AccountDetail } from './account-detail.entity';
 
 @Entity()
 export class Accounts {
@@ -35,21 +35,21 @@ export class Accounts {
   })
   password: string;
 
-  @OneToOne(() => AccountDetailEntity, {
+  @OneToOne(() => AccountDetail, {
     cascade: true,
     eager: true,
     nullable: false,
     orphanedRowAction: 'delete',
   })
   @JoinColumn()
-  detail: AccountDetailEntity;
+  detail: AccountDetail;
 
   static fakeOne(): Accounts {
     const user = new Accounts();
     user.email = faker.internet.email();
     user.number_phone = faker.phone.number();
     user.password = faker.internet.password();
-    user.detail = AccountDetailEntity.fakeOne(
+    user.detail = AccountDetail.fakeOne(
       faker.helpers.arrayElement(['male', 'female'])
     );
     return user;

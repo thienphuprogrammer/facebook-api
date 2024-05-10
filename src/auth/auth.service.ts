@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AccountsService } from '../accounts/accounts.service';
 
@@ -10,4 +10,6 @@ export class AuthService {
   ) {}
 
   async logIn() {}
+
+  async loginWithGoogle() {}
 }

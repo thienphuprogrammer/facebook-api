@@ -18,7 +18,9 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-        "@entities": ["src/db/entities"],
+      "@entities": [
+        "src/db/entities"
+      ]
     }
   }
 }
