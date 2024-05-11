@@ -20,7 +20,19 @@
     "paths": {
       "@entities": [
         "src/db/entities"
-      ]
+      ],
+      "@accounts": [
+        "src/accounts"
+      ],
+      "@Auth": [
+        "src/auth"
+      ],
+      "@crypto": [
+        "src/crypto"
+      ],
+      "@utils": [
+        "src/utils"
+      ],
     }
   }
 }

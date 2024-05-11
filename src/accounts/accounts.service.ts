@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsRelations, Repository } from 'typeorm';
 import { AccountDetail, Accounts } from '@entities';
 import { ValidationError } from 'class-validator';
-import { CreateAccountDto } from './dto/create-account.dto';
 import { AccountDetailDto } from './dto/account-detail.dto';
 
 @Injectable()
@@ -26,11 +25,35 @@ export class AccountsService {
     ]);
   }
 
-  async createAccount(dto: CreateAccountDto) {
-    const errors: Array<ValidationError> = [];
+  async findById(
+    accountId: string,
+    relations?: FindOptionsRelations<Accounts>
+  ) {
+    const account = await this.accountsRepository.findOne({
+      where: { id: accountId },
+      relations: relations,
+    });
+    if (!account) {
+      throw new Error('Account not found');
+    }
+    return account;
+  }
 
-    const result = await Promise.all([
-      dto.detail ? this.validateDetail(dto.detail) : [],
-    ]);
+  async findByEmail(email: string) {
+    const account = await this.accountsRepository.findOne({
+      where: { email: email },
+    });
+    if (!account) {
+      throw new Error('Account not found');
+    }
+    return account;
+  }
+
+  async fake100() {
+    const accounts = [];
+    for (let i = 0; i < 100; i++) {
+      accounts.push(Accounts.fakeOne());
+    }
+    return this.accountsRepository.save(accounts);
   }
 }

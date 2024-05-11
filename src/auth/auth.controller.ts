@@ -5,25 +5,34 @@ import {
   HttpCode,
   HttpStatus,
   Post,
-  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AuthGuard } from './auth.guard.js';
+// import { AuthGuard } from './auth.guard';
 import { LoginDto } from './dto/login.dto';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import ResponseObject from '../utils/response-object';
 
 @Controller('auth')
+@ApiTags('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  login(@Body() dto: LoginDto) {
-    return this.authService.logIn();
+  async login(@Body() dto: LoginDto) {
+    const [data, error] = await this.authService.logIn(dto);
+    if (!data) {
+      return new ResponseObject(
+        HttpStatus.UNAUTHORIZED,
+        'Invalid email or password',
+        null,
+        error
+      );
+    }
+    return new ResponseObject(HttpStatus.OK, 'Login success', data, null);
   }
 
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Get('profile')
   @ApiBearerAuth()
   getProfile({ req }: { req: any }) {

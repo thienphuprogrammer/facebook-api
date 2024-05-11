@@ -1,15 +1,71 @@
-import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { AccountsService } from '../accounts/accounts.service';
+import {
+  HttpException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { AccountsService } from '@accounts';
+import { CryptoService } from '@crypto';
+import { JsonWebTokenError } from '@nestjs/jwt';
+import { Accounts } from '@entities';
+import { LoginDto } from './dto/login.dto';
+import { Env } from '@utils';
+import { AuthTokenReturnDto } from './dto/auth-token-return.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
     private AccountsService: AccountsService,
-    private jwtService: JwtService
+    private CryptoService: CryptoService
   ) {}
 
-  async logIn() {}
+  async logIn(dto: LoginDto) {
+    const account: Accounts = await this.AccountsService.findByEmail(dto.email);
+    if (!account) {
+      return [null, new UnauthorizedException('Invalid email or password')];
+    }
+    const isValid = this.CryptoService.verifySomething(
+      dto.password,
+      account.password
+    );
+    if (!isValid) {
+      return [null, new UnauthorizedException('Invalid email or password')];
+    }
+    const [accessToken, refreshToken] = await this.generateAccessToken(account);
+    return [
+      new AuthTokenReturnDto(accessToken, account.detail.role).setRefreshToken(
+        refreshToken
+      ),
+      null,
+    ];
+  }
 
   async loginWithGoogle() {}
+
+  async verifyAccessToken(accessToken: string) {
+    let account: Accounts = null;
+    try {
+      const accountId = this.CryptoService.verifyJwt(accessToken);
+      account = await this.AccountsService.findById(accountId, {
+        detail: true,
+      });
+    } catch (e) {
+      if (!(e == JsonWebTokenError && e == HttpException)) {
+        console.log(e);
+        throw new HttpException('Invalid access token', 401);
+      }
+    }
+    return account;
+  }
+
+  async generateAccessToken(account: Accounts) {
+    const mail = account.email;
+    const accountId = account.id;
+    return Promise.all([
+      this.CryptoService.signJwt({ mail, accountId }),
+      this.CryptoService.signJwt(
+        { mail, accountId },
+        Env.JWT_REFRESH_EXPIRES_IN
+      ),
+    ]);
+  }
 }
