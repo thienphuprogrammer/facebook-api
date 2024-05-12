@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsRelations, Repository } from 'typeorm';
-import { AccountDetail, Accounts } from '@entities';
+import { AccountDetail, AccountsEntity } from '@entities';
 import { ValidationError } from 'class-validator';
 import { AccountDetailDto } from './dto/account-detail.dto';
 
@@ -9,8 +9,8 @@ import { AccountDetailDto } from './dto/account-detail.dto';
 export class AccountsService {
   constructor(
     // private readonly cryptoService: CryptoService,
-    @InjectRepository(Accounts)
-    private readonly accountsRepository: Repository<Accounts>,
+    @InjectRepository(AccountsEntity)
+    private readonly accountsRepository: Repository<AccountsEntity>,
     @InjectRepository(AccountDetail)
     private readonly accountDetailRepository: Repository<AccountDetail>
   ) {}
@@ -27,14 +27,14 @@ export class AccountsService {
 
   async findById(
     accountId: string,
-    relations?: FindOptionsRelations<Accounts>
+    relations?: FindOptionsRelations<AccountsEntity>
   ) {
     const account = await this.accountsRepository.findOne({
       where: { id: accountId },
       relations: relations,
     });
     if (!account) {
-      throw new Error('Account not found');
+      throw new NotFoundException('Account not found');
     }
     return account;
   }
@@ -44,15 +44,19 @@ export class AccountsService {
       where: { email: email },
     });
     if (!account) {
-      throw new Error('Account not found');
+      throw new NotFoundException('Account not found');
     }
     return account;
+  }
+
+  async allAccounts() {
+    return this.accountsRepository.find();
   }
 
   async fake100() {
     const accounts = [];
     for (let i = 0; i < 100; i++) {
-      accounts.push(Accounts.fakeOne());
+      accounts.push(AccountsEntity.fakeOne());
     }
     return this.accountsRepository.save(accounts);
   }

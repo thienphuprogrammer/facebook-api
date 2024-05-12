@@ -1,4 +1,4 @@
-import { Env } from '../utils/env';
+import { Env } from '@utils';
 import { DataSource } from 'typeorm';
 
 export const datasource = new DataSource({
@@ -10,8 +10,8 @@ export const datasource = new DataSource({
   password: Env.DB_PASSWORD,
   synchronize: true,
   logging: false,
-  entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-  migrations: [__dirname + '/../migrations/*{.ts,.js}'],
+  entities: [__dirname + '/entities/**/*.entity{.ts,.js}'],
+  migrations: [__dirname + '/migrations/*{.ts,.js}'],
 });
 
 console.log(datasource.options);

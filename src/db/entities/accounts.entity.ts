@@ -9,13 +9,13 @@ import { faker } from '@faker-js/faker';
 import { AccountDetail } from './account-detail.entity';
 
 @Entity()
-export class Accounts {
+export class AccountsEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({
     type: 'varchar',
-    length: 20,
+    length: 256,
     nullable: false,
     unique: true,
   })
@@ -23,14 +23,14 @@ export class Accounts {
 
   @Column({
     type: 'varchar',
-    length: 20,
+    length: 256,
     nullable: false,
   })
   number_phone: string;
 
   @Column({
     type: 'varchar',
-    length: 20,
+    length: 256,
     nullable: false,
   })
   password: string;
@@ -44,8 +44,8 @@ export class Accounts {
   @JoinColumn()
   detail: AccountDetail;
 
-  static fakeOne(): Accounts {
-    const user = new Accounts();
+  static fakeOne(): AccountsEntity {
+    const user = new AccountsEntity();
     user.email = faker.internet.email();
     user.number_phone = faker.phone.number();
     user.password = faker.internet.password();

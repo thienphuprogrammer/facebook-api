@@ -6,10 +6,11 @@ import {
 import { AccountsService } from '@accounts';
 import { CryptoService } from '@crypto';
 import { JsonWebTokenError } from '@nestjs/jwt';
-import { Accounts } from '@entities';
+import { AccountsEntity } from '@entities';
 import { LoginDto } from './dto/login.dto';
 import { Env } from '@utils';
 import { AuthTokenReturnDto } from './dto/auth-token-return.dto';
+import { tr } from '@faker-js/faker';
 
 @Injectable()
 export class AuthService {
@@ -19,7 +20,13 @@ export class AuthService {
   ) {}
 
   async logIn(dto: LoginDto) {
-    const account: Accounts = await this.AccountsService.findByEmail(dto.email);
+    let account: AccountsEntity = null;
+    try {
+      account = await this.AccountsService.findByEmail(dto.email);
+    } catch (e) {
+      return [null, new UnauthorizedException('Invalid email or password')];
+    }
+
     if (!account) {
       return [null, new UnauthorizedException('Invalid email or password')];
     }
@@ -42,7 +49,7 @@ export class AuthService {
   async loginWithGoogle() {}
 
   async verifyAccessToken(accessToken: string) {
-    let account: Accounts = null;
+    let account: AccountsEntity = null;
     try {
       const accountId = this.CryptoService.verifyJwt(accessToken);
       account = await this.AccountsService.findById(accountId, {
@@ -57,7 +64,7 @@ export class AuthService {
     return account;
   }
 
-  async generateAccessToken(account: Accounts) {
+  async generateAccessToken(account: AccountsEntity) {
     const mail = account.email;
     const accountId = account.id;
     return Promise.all([

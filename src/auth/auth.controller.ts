@@ -5,9 +5,10 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-// import { AuthGuard } from './auth.guard';
+import { AuthGuard } from './auth.guard';
 import { LoginDto } from './dto/login.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import ResponseObject from '../utils/response-object';
@@ -20,7 +21,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(@Body() dto: LoginDto) {
-    const [data, error] = await this.authService.logIn(dto);
+    const [data, error] = await this.authService.log  In(dto);
     if (!data) {
       return new ResponseObject(
         HttpStatus.UNAUTHORIZED,
@@ -32,7 +33,7 @@ export class AuthController {
     return new ResponseObject(HttpStatus.OK, 'Login success', data, null);
   }
 
-  // @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   @Get('profile')
   @ApiBearerAuth()
   getProfile({ req }: { req: any }) {

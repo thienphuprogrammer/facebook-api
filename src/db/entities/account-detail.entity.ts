@@ -28,21 +28,21 @@ export class AccountDetail {
 
   @Column({
     type: 'varchar',
-    length: 20,
+    length: 256,
     nullable: true,
   })
   firstName: string;
 
   @Column({
     type: 'varchar',
-    length: 20,
+    length: 256,
     nullable: true,
   })
   lastName: string;
 
   @Column({
     type: 'varchar',
-    length: 20,
+    length: 256,
     nullable: false,
   })
   nickName: string;
