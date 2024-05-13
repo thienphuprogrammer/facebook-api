@@ -10,7 +10,6 @@ import { AccountsEntity } from '@entities';
 import { LoginDto } from './dto/login.dto';
 import { Env } from '@utils';
 import { AuthTokenReturnDto } from './dto/auth-token-return.dto';
-import { tr } from '@faker-js/faker';
 
 @Injectable()
 export class AuthService {
@@ -39,7 +38,7 @@ export class AuthService {
     }
     const [accessToken, refreshToken] = await this.generateAccessToken(account);
     return [
-      new AuthTokenReturnDto(accessToken, account.detail.role).setRefreshToken(
+      new AuthTokenReturnDto(accessToken, account.role).setRefreshToken(
         refreshToken
       ),
       null,

@@ -1,15 +1,13 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { RoleEnum } from '../../utils/enums';
 import { faker } from '@faker-js/faker';
 
 @Entity()
-export class AccountDetail {
+export class AccountDetailEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({
-    type: 'varchar',
-    length: 256,
+    type: 'text',
     nullable: true,
   })
   avatar: string;
@@ -48,21 +46,21 @@ export class AccountDetail {
   nickName: string;
 
   @Column({
-    type: 'enum',
-    enum: RoleEnum,
-    default: RoleEnum.USER,
+    type: 'varchar',
+    length: 256,
+    nullable: false,
   })
-  role: RoleEnum;
+  number_phone: string;
 
   static fakeOne(gender: 'male' | 'female') {
-    const detail = new AccountDetail();
+    const detail = new AccountDetailEntity();
     detail.avatar = faker.image.avatar();
     detail.age = faker.number.int({ min: 18, max: 100 });
     detail.birthday = faker.date.past();
     detail.firstName = faker.person.firstName(gender);
     detail.lastName = faker.person.lastName(gender);
     detail.nickName = faker.internet.userName();
-    detail.role = RoleEnum.USER;
+    detail.number_phone = faker.phone.number();
     return detail;
   }
 }

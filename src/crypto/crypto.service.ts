@@ -20,15 +20,15 @@ export class CryptoService {
   }
 
   signSomething(something: string) {
-    const sign = createSign('RSA-SHA256');
+    const sign = createSign('SHA256');
     sign.update(something);
-    return sign.sign(this.privateKey, 'base64');
+    return sign.sign(this.privateKey).toString('base64');
   }
 
   verifySomething(something: string, signature: string) {
-    const verify = createVerify('RSA-SHA256');
+    const verify = createVerify('SHA256');
     verify.update(something);
-    return verify.verify(this.publicKey, signature, 'base64');
+    return verify.verify(this.publicKey, Buffer.from(signature, 'base64'));
   }
 
   signJwt(subject: any, expiresIn: string = Env.JWT_EXPIRES_IN) {

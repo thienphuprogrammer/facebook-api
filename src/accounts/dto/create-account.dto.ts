@@ -16,17 +16,18 @@ export class CreateAccountDto {
   @IsNotEmpty()
   @MaxLength(50)
   @IsOptional()
-  readonly email: string;
+  email: string;
 
   @ApiProperty()
   @IsString()
   @IsStrongPassword()
   @IsNotEmpty()
-  readonly password: string;
+  @MaxLength(50)
+  password: string;
 
   @ApiProperty({ type: AccountDetailDto, required: false })
   @IsOptional()
   @ValidateNested()
   @Type(() => AccountDetailDto)
-  readonly detail: AccountDetailDto;
+  detail?: AccountDetailDto;
 }

@@ -6,7 +6,8 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { faker } from '@faker-js/faker';
-import { AccountDetail } from './account-detail.entity';
+import { AccountDetailEntity } from './account-detail.entity';
+import { RoleEnum } from '@utils';
 
 @Entity()
 export class AccountsEntity {
@@ -22,34 +23,32 @@ export class AccountsEntity {
   email: string;
 
   @Column({
-    type: 'varchar',
-    length: 256,
-    nullable: false,
-  })
-  number_phone: string;
-
-  @Column({
-    type: 'varchar',
-    length: 256,
-    nullable: false,
+    type: 'text',
   })
   password: string;
 
-  @OneToOne(() => AccountDetail, {
+  @Column({
+    type: 'enum',
+    enum: RoleEnum,
+    default: RoleEnum.USER,
+  })
+  role: RoleEnum;
+
+  @OneToOne(() => AccountDetailEntity, {
     cascade: true,
     eager: true,
-    nullable: false,
+    nullable: true,
     orphanedRowAction: 'delete',
   })
   @JoinColumn()
-  detail: AccountDetail;
+  detail: AccountDetailEntity;
 
   static fakeOne(): AccountsEntity {
     const user = new AccountsEntity();
     user.email = faker.internet.email();
-    user.number_phone = faker.phone.number();
     user.password = faker.internet.password();
-    user.detail = AccountDetail.fakeOne(
+    user.role = RoleEnum.USER;
+    user.detail = AccountDetailEntity.fakeOne(
       faker.helpers.arrayElement(['male', 'female'])
     );
     return user;

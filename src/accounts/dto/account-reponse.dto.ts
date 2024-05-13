@@ -8,7 +8,7 @@ import {
   MaxLength,
 } from 'class-validator';
 
-export class AccountDetailDto {
+export class AccountResponseDto {
   @ApiProperty()
   @IsString()
   @IsOptional()
@@ -42,9 +42,8 @@ export class AccountDetailDto {
   @IsNotEmpty()
   readonly birthday: Date;
 
-  @ApiProperty()
+  @ApiProperty({ type: AccountResponseDto })
   @IsString()
-  @IsOptional()
-  @MaxLength(50)
-  readonly number_phone: string;
+  @IsNotEmpty()
+  readonly accountDetail: AccountResponseDto;
 }
