@@ -1,49 +1,15 @@
-import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsDate,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-  MaxLength,
-} from 'class-validator';
+import { Expose, Type } from 'class-transformer';
+import { AccountDetailDto } from './account-detail.dto';
+import { RoleEnum } from '@utils';
 
 export class AccountResponseDto {
-  @ApiProperty()
-  @IsString()
-  @IsOptional()
-  @MaxLength(50)
-  @IsNotEmpty()
-  readonly firstName: string;
+  @Expose()
+  id: string;
 
-  @ApiProperty()
-  @IsString()
-  @IsOptional()
-  @MaxLength(50)
-  @IsNotEmpty()
-  readonly lastName: string;
+  @Expose()
+  role: RoleEnum;
 
-  @ApiProperty()
-  @IsString()
-  @IsOptional()
-  @MaxLength(50)
-  @IsNotEmpty()
-  readonly nickName: string;
-
-  @ApiProperty()
-  @IsNumber()
-  @IsOptional()
-  @IsNotEmpty()
-  readonly age: number;
-
-  @ApiProperty()
-  @IsDate()
-  @IsOptional()
-  @IsNotEmpty()
-  readonly birthday: Date;
-
-  @ApiProperty({ type: AccountResponseDto })
-  @IsString()
-  @IsNotEmpty()
-  readonly accountDetail: AccountResponseDto;
+  @Expose()
+  @Type(() => AccountDetailDto)
+  detail?: AccountDetailDto;
 }

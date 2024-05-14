@@ -7,44 +7,42 @@ import {
   IsString,
   MaxLength,
 } from 'class-validator';
+import { Expose } from 'class-transformer';
 
 export class AccountDetailDto {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  @MaxLength(50)
-  @IsNotEmpty()
-  readonly firstName: string;
+  @Expose()
+  firstName: string;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
-  @MaxLength(50)
-  @IsNotEmpty()
-  readonly lastName: string;
+  @Expose()
+  lastName: string;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
-  @MaxLength(50)
-  @IsNotEmpty()
-  readonly nickName: string;
+  @Expose()
+  nickName: string;
 
   @ApiProperty()
   @IsNumber()
   @IsOptional()
-  @IsNotEmpty()
-  readonly age: number;
+  @Expose()
+  age: number;
 
   @ApiProperty()
   @IsDate()
   @IsOptional()
-  @IsNotEmpty()
-  readonly birthday: Date;
+  @Expose()
+  birthday: Date;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
-  @MaxLength(50)
-  readonly number_phone: string;
+  @Expose()
+  number_phone: string;
 }

@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
-import { LoginDto } from './dto/login.dto';
+import { AuthLoginDto } from './dto/auth-login.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import ResponseObject from '../utils/response-object';
 
@@ -20,7 +20,7 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async login(@Body() dto: LoginDto) {
+  async login(@Body() dto: AuthLoginDto) {
     const [data, error] = await this.authService.logIn(dto);
     if (!data) {
       return new ResponseObject(

@@ -7,7 +7,7 @@ import { AccountsService } from '@accounts';
 import { CryptoService } from '@crypto';
 import { JsonWebTokenError } from '@nestjs/jwt';
 import { AccountsEntity } from '@entities';
-import { LoginDto } from './dto/login.dto';
+import { AuthLoginDto } from './dto/auth-login.dto';
 import { Env } from '@utils';
 import { AuthTokenReturnDto } from './dto/auth-token-return.dto';
 
@@ -18,7 +18,7 @@ export class AuthService {
     private CryptoService: CryptoService
   ) {}
 
-  async logIn(dto: LoginDto) {
+  async logIn(dto: AuthLoginDto) {
     let account: AccountsEntity = null;
     try {
       account = await this.AccountsService.findByEmail(dto.email);
@@ -57,21 +57,16 @@ export class AuthService {
     } catch (e) {
       if (!(e == JsonWebTokenError && e == HttpException)) {
         console.log(e);
-        throw new HttpException('Invalid access token', 401);
       }
     }
     return account;
   }
 
   async generateAccessToken(account: AccountsEntity) {
-    const mail = account.email;
-    const accountId = account.id;
+    const accountId = account.id.toString(); // convert id to string
     return Promise.all([
-      this.CryptoService.signJwt({ mail, accountId }),
-      this.CryptoService.signJwt(
-        { mail, accountId },
-        Env.JWT_REFRESH_EXPIRES_IN
-      ),
+      this.CryptoService.signJwt(accountId),
+      this.CryptoService.signJwt(accountId, Env.JWT_REFRESH_EXPIRES_IN),
     ]);
   }
 }
