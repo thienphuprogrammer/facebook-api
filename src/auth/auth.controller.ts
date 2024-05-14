@@ -21,7 +21,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(@Body() dto: SignInDto) {
-    const [data, error] = await this.authService.logIn(dto);
+    const [data, error] = await this.authService.SignIn(dto);
     if (!data) {
       return new ResponseObject(
         HttpStatus.UNAUTHORIZED,

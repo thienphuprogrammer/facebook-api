@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { faker } from '@faker-js/faker';
 import { RoleEnum } from '../../common/utils';
-import { IAccounts, IAccountDetail, ICredentials } from '../interfaces';
+import { IAccounts, IAccountDetail } from '../interfaces';
 import { CredentialsEmbeddable } from './credentials.entity';
 import { IsBoolean, IsEmail, IsString } from 'class-validator';
 import { AccountDetail } from './account-detail.entity';
@@ -15,7 +15,7 @@ import { AccountDetail } from './account-detail.entity';
 @Entity({ name: 'accounts' })
 export class AccountsEntity implements IAccounts {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  public id: string;
 
   @Column({
     type: 'varchar',
@@ -25,20 +25,20 @@ export class AccountsEntity implements IAccounts {
   })
   @IsString()
   @IsEmail()
-  email: string;
+  public email: string;
 
   @Column({
     type: 'text',
   })
   @IsString()
-  password: string;
+  public password: string;
 
   @Column({
     type: 'enum',
     enum: RoleEnum,
     default: RoleEnum.USER,
   })
-  role: RoleEnum;
+  public role: RoleEnum;
 
   @OneToOne(() => AccountDetail, {
     cascade: true,
@@ -47,35 +47,30 @@ export class AccountsEntity implements IAccounts {
     orphanedRowAction: 'delete',
   })
   @JoinColumn()
-  detail: IAccountDetail;
+  public detail: IAccountDetail;
 
-  @OneToOne(() => CredentialsEmbeddable, {
-    cascade: true,
-    eager: true,
-    nullable: false,
-    orphanedRowAction: 'delete',
-  })
-  credentials: ICredentials;
+  @Column(() => CredentialsEmbeddable, {})
+  public credentials: CredentialsEmbeddable = new CredentialsEmbeddable();
 
   @Column({
     type: 'boolean',
     default: false,
   })
   @IsBoolean()
-  confirmed: boolean;
+  public confirmed: boolean;
 
   @Column({
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',
   })
-  createdAt: Date;
+  public createdAt: Date;
 
   @Column({
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',
     onUpdate: 'CURRENT_TIMESTAMP',
   })
-  updatedAt: Date;
+  public updatedAt: Date;
 
   static fakeOne(): AccountsEntity {
     const user = new AccountsEntity();

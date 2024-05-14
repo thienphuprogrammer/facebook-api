@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -7,13 +8,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsRelations, Not, Repository } from 'typeorm';
 import { IAccountDetail, IAccounts } from './interfaces';
 import { ValidationError } from 'class-validator';
-import { AccountDetailDto } from './dto/account-detail.dto';
-import { CreateAccountDto } from './dto/create-account.dto';
+import { AccountDetailDto, CreateAccountDto } from './dto';
 import { MyValidationError } from '../errors/my-validation-error';
-import { CryptoService } from '@crypto';
 import { CommonService } from '../common/common.service';
 import { AccountsEntity, AccountDetail } from './entities';
 import { isNull, isUndefined } from '../common/utils/validation.util';
+import { compare } from 'bcrypt';
+import { CryptoService } from '../crypto/crypto.service';
 
 @Injectable()
 export class AccountsService {
@@ -133,9 +134,7 @@ export class AccountsService {
     return account ? account : null;
   }
 
-  public async findOneByEmail(
-    email: string
-  ): Promise<AccountsEntity | undefined> {
+  public async findOneByEmail(email: string): Promise<IAccounts> {
     const account = await this.accountsRepository.findOne({
       where: { email: email },
     });
@@ -143,7 +142,7 @@ export class AccountsService {
     return account;
   }
 
-  public async findOneById(id: string): Promise<AccountsEntity | undefined> {
+  public async findOneById(id: string): Promise<IAccounts> {
     const account = await this.accountsRepository.findOne({
       where: { id: id },
     });
@@ -151,9 +150,7 @@ export class AccountsService {
     return account;
   }
 
-  public async uncheckedUserByEmail(
-    email: string
-  ): Promise<AccountsEntity | undefined> {
+  public async uncheckedUserByEmail(email: string): Promise<IAccounts> {
     const formattedEmail = email.toLowerCase();
     return this.accountsRepository.findOne({
       where: { email: formattedEmail },
@@ -161,7 +158,7 @@ export class AccountsService {
   }
 
   public async throwUnauthorizedException(
-    account: AccountsEntity | undefined | null
+    account: IAccounts | undefined | null
   ): Promise<void> {
     if (isUndefined(account) || isNull(account)) {
       throw new UnauthorizedException('Account not found');
@@ -171,7 +168,7 @@ export class AccountsService {
   public async findOneByCredentials(
     id: string,
     version: number
-  ): Promise<AccountsEntity> {
+  ): Promise<IAccounts> {
     const account = await this.accountsRepository.findOne({
       where: { id: id },
     });
@@ -180,6 +177,22 @@ export class AccountsService {
       throw new UnauthorizedException('Invalid version');
     }
     return account;
+  }
+
+  public async updatePassword(
+    accountId: string,
+    password: string,
+    newPassword: string
+  ): Promise<AccountsEntity> {
+    const account = await this.findOneById(accountId);
+    if (!(await compare(password, account.password))) {
+      throw new BadRequestException('Wrong password');
+    }
+    if (compare(newPassword, account.password)) {
+      throw new BadRequestException('New password must be different');
+    }
+    account.credentials.updatedAt;
+    account.password = this.cryptoService.signSomething(newPassword);
   }
 
   async fake100() {

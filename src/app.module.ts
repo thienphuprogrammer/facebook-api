@@ -10,6 +10,7 @@ import { config } from './config';
 import { JwtModule } from './jwt/jwt.module';
 import { CommonModule } from './common/common.module';
 import { MailerModule } from './mailer/mailer.module';
+import { CryptoModule } from './crypto/crypto.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { MailerModule } from './mailer/mailer.module';
       load: [config],
     }),
     MailerModule,
+    CryptoModule,
   ],
   controllers: [AppController],
   providers: [AppService],

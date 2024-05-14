@@ -5,53 +5,53 @@ import { IAccountDetail } from '../interfaces';
 @Entity({ name: 'account_details' })
 export class AccountDetail implements IAccountDetail {
   @PrimaryGeneratedColumn()
-  id: number;
+  public id: number;
 
   @Column({
     type: 'text',
     nullable: true,
   })
-  avatar: string;
+  public avatar: string;
 
   @Column({
     type: 'int',
     nullable: true,
   })
-  age: number;
+  public age: number;
 
   @Column({
     type: 'date',
     nullable: true,
   })
-  birthday: Date;
+  public birthday: Date;
 
   @Column({
     type: 'varchar',
     length: 256,
     nullable: true,
   })
-  firstName: string;
+  public firstName: string;
 
   @Column({
     type: 'varchar',
     length: 256,
     nullable: true,
   })
-  lastName: string;
+  public lastName: string;
 
   @Column({
     type: 'varchar',
     length: 256,
     nullable: false,
   })
-  nickName: string;
+  public nickName: string;
 
   @Column({
     type: 'varchar',
     length: 256,
     nullable: false,
   })
-  number_phone: string;
+  public number_phone: string;
 
   static fakeOne(gender: 'male' | 'female') {
     const detail = new AccountDetail();

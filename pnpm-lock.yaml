@@ -129,6 +129,9 @@ importers:
       class-validator:
         specifier: ^0.14.1
         version: 0.14.1
+      dayjs:
+        specifier: ^1.11.11
+        version: 1.11.11
       eslint:
         specifier: ^8.42.0
         version: 8.57.0

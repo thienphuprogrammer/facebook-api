@@ -1,32 +1,38 @@
 import { ICredentials } from '../interfaces';
 import { Column, Entity } from 'typeorm';
+import dayjs from 'dayjs';
 
+//Embeddable() convert to typeorm
 @Entity({ name: 'credentials' })
 export class CredentialsEmbeddable implements ICredentials {
   @Column({
     type: 'varchar',
     length: 256,
     nullable: false,
+    default: '',
   })
-  lastPassword: string;
+  public lastPassword: string;
 
   @Column({
     type: 'bigint',
     nullable: false,
+    default: dayjs().unix(),
   })
-  passwordUpdatedAt: number = Date.now();
+  public passwordUpdatedAt: number = dayjs().unix();
 
   @Column({
     type: 'bigint',
     nullable: false,
+    default: dayjs().unix(),
   })
-  updatedAt: number = Date.now();
+  public updatedAt: number = dayjs().unix();
 
   @Column({
     type: 'int',
     nullable: false,
+    default: 0,
   })
-  version: number = 0;
+  public version: number = 0;
 
   public updatePassword(password: string): void {
     this.version++;

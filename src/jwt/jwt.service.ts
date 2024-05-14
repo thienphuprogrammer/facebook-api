@@ -10,12 +10,11 @@ import * as jwt from 'jsonwebtoken';
 import {
   IAccessPayload,
   IAccessToken,
-} from './interfaces/access-token.interface';
-import { IEmailPayload, IEmailToken } from './interfaces/email-token.interface';
-import {
+  IEmailPayload,
+  IEmailToken,
   IRefreshPayload,
   IRefreshToken,
-} from './interfaces/refresh-token.interface';
+} from './interfaces';
 import { IAccounts } from '../accounts/interfaces';
 import { TokenTypeEnum } from '../common/utils';
 import { v4 } from 'uuid';

@@ -1,7 +1,7 @@
 import { IAccounts } from '../../accounts/interfaces';
 
 export interface IAuthResult {
-  user: IAccounts;
+  account: IAccounts;
   accessToken: string;
   refreshToken: string;
 }
