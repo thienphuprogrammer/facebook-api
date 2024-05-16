@@ -1,24 +1,30 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsRelations, Not, Repository } from 'typeorm';
-import { AccountDetailEntity, AccountsEntity } from '@entities';
+import { AccountDetail } from './entities/account.detail';
+import { Accounts } from './entities/accounts';
 import { ValidationError } from 'class-validator';
 import { AccountDetailDto } from './dto/account-detail.dto';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { MyValidationError } from '../errors/my-validation-error';
 import { CryptoService } from '@crypto';
+import { CommonService } from '../common/common.service';
 
 @Injectable()
 export class AccountsService {
   constructor(
     private readonly cryptoService: CryptoService,
-    @InjectRepository(AccountsEntity)
-    private readonly accountsRepository: Repository<AccountsEntity>,
-    @InjectRepository(AccountDetailEntity)
-    private readonly accountDetailRepository: Repository<AccountDetailEntity>
+    @InjectRepository(Accounts)
+    private readonly accountsRepository: Repository<Accounts>,
+    @InjectRepository(AccountDetail)
+    private readonly accountDetailRepository: Repository<AccountDetail>,
+    private readonly commonService: CommonService
   ) {}
 
-  async validateDetail(detail: AccountDetailDto, accountId?: string) {
+  async validateDetail(
+    detail: AccountDetailDto,
+    accountId?: string
+  ): Promise<ValidationError[]> {
     const errors: Array<ValidationError> = [];
     const result = await Promise.all([
       accountId
@@ -42,9 +48,23 @@ export class AccountsService {
     return errors;
   }
 
+  public async checkEmailUniqueness(email: string): Promise<ValidationError[]> {
+    const errors: Array<ValidationError> = [];
+    const result = await Promise.all([
+      this.accountsRepository.exists({ where: { email: email } }),
+    ]);
+    if (result[0]) {
+      const error = new ValidationError();
+      error.property = 'email';
+      error.constraints = { isUnique: 'email already exists' };
+      errors.push(error);
+    }
+    return errors;
+  }
+
   async findById(
     accountId: string,
-    relations?: FindOptionsRelations<AccountsEntity>
+    relations?: FindOptionsRelations<Accounts>
   ) {
     const account = await this.accountsRepository.findOne({
       where: { id: accountId },
@@ -73,8 +93,10 @@ export class AccountsService {
   async create(dto: CreateAccountDto) {
     const errors: Array<ValidationError> = [];
 
+    const formattedEmail = dto.email.toLowerCase();
+
     const results = await Promise.all([
-      this.accountsRepository.exists({ where: { email: dto.email } }),
+      this.checkEmailUniqueness(formattedEmail),
       dto.detail ? this.validateDetail(dto.detail) : [],
     ]);
 
@@ -97,7 +119,7 @@ export class AccountsService {
 
     const account = this.accountsRepository.save(
       this.accountsRepository.create({
-        email: dto.email,
+        email: formattedEmail,
         password: this.cryptoService.signSomething(dto.password),
         detail: accountDetail,
       })
@@ -106,10 +128,26 @@ export class AccountsService {
     return account ? account : null;
   }
 
+  public async findOneByEmail(email: string): Promise<Accounts | undefined> {
+    const account = await this.accountsRepository.findOne({
+      where: { email: email },
+    });
+    this.commonService.checkEntityExistence(account, 'Account');
+    return account;
+  }
+
+  public async findOneById(id: string): Promise<Accounts | undefined> {
+    const account = await this.accountsRepository.findOne({
+      where: { id: id },
+    });
+    this.commonService.checkEntityExistence(account, 'Account');
+    return account;
+  }
+
   async fake100() {
     const accounts = [];
     for (let i = 0; i < 100; i++) {
-      accounts.push(AccountsEntity.fakeOne());
+      accounts.push(Accounts.fakeOne());
     }
     return this.accountsRepository.save(accounts);
   }

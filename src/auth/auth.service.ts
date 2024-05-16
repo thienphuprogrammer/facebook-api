@@ -3,12 +3,11 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AccountsService } from '@accounts';
+import { AccountsService, Accounts } from '@accounts';
 import { CryptoService } from '@crypto';
 import { JsonWebTokenError } from '@nestjs/jwt';
-import { AccountsEntity } from '@entities';
 import { AuthLoginDto } from './dto/auth-login.dto';
-import { Env } from '@utils';
+import { Env } from 'src/common/utils';
 import { AuthTokenReturnDto } from './dto/auth-token-return.dto';
 
 @Injectable()
@@ -19,7 +18,7 @@ export class AuthService {
   ) {}
 
   async logIn(dto: AuthLoginDto) {
-    let account: AccountsEntity = null;
+    let account: Accounts = null;
     try {
       account = await this.AccountsService.findByEmail(dto.email);
     } catch (e) {
@@ -45,10 +44,12 @@ export class AuthService {
     ];
   }
 
-  async loginWithGoogle() {}
+  async loginWithGoogle() {
+    // const client = this.CryptoService.createGoogleClient();
+  }
 
   async verifyAccessToken(accessToken: string) {
-    let account: AccountsEntity = null;
+    let account: Accounts = null;
     try {
       const accountId = this.CryptoService.verifyJwt(accessToken);
       account = await this.AccountsService.findById(accountId, {
@@ -62,7 +63,7 @@ export class AuthService {
     return account;
   }
 
-  async generateAccessToken(account: AccountsEntity) {
+  async generateAccessToken(account: Accounts) {
     const accountId = account.id.toString(); // convert id to string
     return Promise.all([
       this.CryptoService.signJwt(accountId),

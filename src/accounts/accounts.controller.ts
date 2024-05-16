@@ -2,9 +2,9 @@ import { Body, Controller, Get, HttpStatus, Post } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateAccountDto } from './dto/create-account.dto';
-import { DtoMapper } from '@utils';
+import { DtoMapper } from 'src/common/utils';
 import { AccountResponseDto } from './dto/account-reponse.dto';
-import ResponseObject from '../utils/response-object';
+import ResponseObject from '../common/utils/response-object';
 
 @Controller('accounts')
 @ApiTags('accounts')

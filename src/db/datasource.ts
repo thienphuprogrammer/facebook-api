@@ -1,4 +1,4 @@
-import { Env } from '@utils';
+import { Env } from 'src/common/utils';
 import { DataSource } from 'typeorm';
 
 export const datasource = new DataSource({

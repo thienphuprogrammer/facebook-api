@@ -11,7 +11,7 @@ import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
 import { AuthLoginDto } from './dto/auth-login.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import ResponseObject from '../utils/response-object';
+import ResponseObject from '../common/utils/response-object';
 
 @Controller('auth')
 @ApiTags('auth')

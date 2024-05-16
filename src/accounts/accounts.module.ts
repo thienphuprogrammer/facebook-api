@@ -2,14 +2,15 @@ import { forwardRef, Module } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 import { AccountsController } from './accounts.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AccountDetailEntity, AccountsEntity } from '@entities';
+import { Accounts } from './entities/accounts';
+import { AccountDetail } from './entities/account.detail';
 import { CryptoModule } from '@crypto';
 import { AuthModule } from '@Auth';
 
 @Module({
   imports: [
     CryptoModule.register(),
-    TypeOrmModule.forFeature([AccountsEntity, AccountDetailEntity]),
+    TypeOrmModule.forFeature([Accounts, AccountDetail]),
     forwardRef(() => AuthModule),
   ],
   controllers: [AccountsController],

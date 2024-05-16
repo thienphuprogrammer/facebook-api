@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { createHmac, createSign, createVerify } from 'node:crypto';
-import { Env } from '@utils';
+import { Env } from 'src/common/utils';
 import * as jwt from 'jsonwebtoken';
 import { verify } from 'jsonwebtoken';
 

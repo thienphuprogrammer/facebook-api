@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "module": "commonjs",
+    "esModuleInterop": true,
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
@@ -18,21 +19,11 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@entities": [
-        "src/db/entities"
-      ],
-      "@accounts": [
-        "src/accounts"
-      ],
-      "@Auth": [
-        "src/auth"
-      ],
-      "@crypto": [
-        "src/crypto"
-      ],
-      "@utils": [
-        "src/utils"
-      ],
-    }
+      "@entities": ["src/../entities/*.ts"],
+      "@accounts": ["src/accounts"],
+      "@Auth": ["src/auth"],
+      "@crypto": ["src/crypto"],
+      "@utils": ["src/utils"]
+    },
   }
 }

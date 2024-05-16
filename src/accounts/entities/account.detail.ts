@@ -2,7 +2,7 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { faker } from '@faker-js/faker';
 
 @Entity()
-export class AccountDetailEntity {
+export class AccountDetail {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -53,7 +53,7 @@ export class AccountDetailEntity {
   number_phone: string;
 
   static fakeOne(gender: 'male' | 'female') {
-    const detail = new AccountDetailEntity();
+    const detail = new AccountDetail();
     detail.avatar = faker.image.avatar();
     detail.age = faker.number.int({ min: 18, max: 100 });
     detail.birthday = faker.date.past();

@@ -1,4 +1,4 @@
-import { RoleEnum } from '@utils';
+import { RoleEnum } from 'src/common/utils';
 
 export class AuthTokenReturnDto {
   timestamp: Date;

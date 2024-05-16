@@ -1,6 +1,6 @@
 import { Expose, Type } from 'class-transformer';
 import { AccountDetailDto } from './account-detail.dto';
-import { RoleEnum } from '@utils';
+import { RoleEnum } from 'src/common/utils';
 
 export class AccountResponseDto {
   @Expose()
