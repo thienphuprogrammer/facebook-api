@@ -4,7 +4,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AccountsEntity, AccountsService } from '@accounts';
-import { CryptoService } from '@crypto';
 import { JsonWebTokenError } from '@nestjs/jwt';
 import { SignInDto } from './dto/sign-in.dto';
 import { Env, TokenTypeEnum } from 'src/common/utils';
@@ -22,7 +21,6 @@ import { IRefreshToken } from '../jwt/interfaces';
 export class AuthService {
   constructor(
     private accountsService: AccountsService,
-    private CryptoService: CryptoService,
     private readonly commonService: CommonService,
     private readonly jwtService: JwtService,
     private readonly mailerService: MailerService,
@@ -30,7 +28,10 @@ export class AuthService {
     private readonly blacklistedTokensRepository: Repository<BlacklistedTokenEntity>
   ) {}
 
-  async logIn(dto: SignInDto) {
+  async logIn(
+    dto: SignInDto,
+    domain?: string
+  ): Promise<[AuthTokenReturnDto, HttpException]> {
     let account: AccountsEntity = null;
     try {
       account = await this.accountsService.findByEmail(dto.email);
@@ -41,14 +42,11 @@ export class AuthService {
     if (!account) {
       return [null, new UnauthorizedException('Invalid email or password')];
     }
-    const isValid = this.CryptoService.verifySomething(
-      dto.password,
-      account.password
-    );
+    const isValid = null;
     if (!isValid) {
       return [null, new UnauthorizedException('Invalid email or password')];
     }
-    const [accessToken, refreshToken] = await this.generateAccessToken(account);
+    const [accessToken, refreshToken] = await this.generateAuthTokens(account);
     return [
       new AuthTokenReturnDto(accessToken, account.role).setRefreshToken(
         refreshToken
@@ -59,29 +57,6 @@ export class AuthService {
 
   async loginWithGoogle() {
     // const client = this.CryptoService.createGoogleClient();
-  }
-
-  async verifyAccessToken(accessToken: string) {
-    let account: AccountsEntity = null;
-    try {
-      const accountId = this.CryptoService.verifyJwt(accessToken);
-      account = await this.accountsService.findById(accountId, {
-        detail: true,
-      });
-    } catch (e) {
-      if (!(e == JsonWebTokenError && e == HttpException)) {
-        console.log(e);
-      }
-    }
-    return account;
-  }
-
-  async generateAccessToken(account: AccountsEntity) {
-    const accountId = account.id.toString(); // convert id to string
-    return Promise.all([
-      this.CryptoService.signJwt(accountId),
-      this.CryptoService.signJwt(accountId, Env.JWT_REFRESH_EXPIRES_IN),
-    ]);
   }
 
   private async generateAuthTokens(
@@ -116,7 +91,9 @@ export class AuthService {
       );
 
     await this.checkIfTokenIsBlacklisted(id, tokenId);
-    const user = await this.accountsService.userByCredentials(id, version);
+    const [user] = await Promise.all([
+      this.accountsService.findOneByCredentials(id, version),
+    ]);
     const [accessToken, newRefreshToken] = await this.generateAuthTokens(
       user,
       domain,
@@ -130,8 +107,7 @@ export class AuthService {
     tokenId: string
   ): Promise<void> {
     const count = await this.blacklistedTokensRepository.count({
-      accountId: accountId,
-      tokenId,
+      where: { tokenId, user: { id: accountId } },
     });
 
     if (count > 0) {
