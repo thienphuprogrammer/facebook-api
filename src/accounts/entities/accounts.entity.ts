@@ -6,15 +6,14 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { faker } from '@faker-js/faker';
-import { AccountDetail } from './account.detail';
 import { RoleEnum } from '../../common/utils';
-import { IAccounts } from '../interfaces/accounts.interface';
-import { ICredentials } from '../interfaces/credentials.interface';
+import { IAccounts, IAccountDetail, ICredentials } from '../interfaces';
 import { CredentialsEmbeddable } from './credentials.entity';
 import { IsBoolean, IsEmail, IsString } from 'class-validator';
+import { AccountDetail } from './account-detail.entity';
 
-@Entity()
-export class Accounts implements IAccounts {
+@Entity({ name: 'accounts' })
+export class AccountsEntity implements IAccounts {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -48,7 +47,7 @@ export class Accounts implements IAccounts {
     orphanedRowAction: 'delete',
   })
   @JoinColumn()
-  detail: AccountDetail;
+  detail: IAccountDetail;
 
   @OneToOne(() => CredentialsEmbeddable, {
     cascade: true,
@@ -78,8 +77,8 @@ export class Accounts implements IAccounts {
   })
   updatedAt: Date;
 
-  static fakeOne(): Accounts {
-    const user = new Accounts();
+  static fakeOne(): AccountsEntity {
+    const user = new AccountsEntity();
     user.email = faker.internet.email();
     user.password = faker.internet.password();
     user.role = RoleEnum.USER;

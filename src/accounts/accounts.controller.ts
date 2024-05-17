@@ -1,9 +1,8 @@
 import { Body, Controller, Get, HttpStatus, Post } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 import { ApiTags } from '@nestjs/swagger';
-import { CreateAccountDto } from './dto/create-account.dto';
+import { CreateAccountDto, AccountResponseDto } from './dto';
 import { DtoMapper } from 'src/common/utils';
-import { AccountResponseDto } from './dto/account-reponse.dto';
 import ResponseObject from '../common/utils/response-object';
 
 @Controller('accounts')

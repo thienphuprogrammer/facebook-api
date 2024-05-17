@@ -9,19 +9,21 @@ import { validationSchema } from './config/config.schema';
 import { config } from './config';
 import { JwtModule } from './jwt/jwt.module';
 import { CommonModule } from './common/common.module';
+import { MailerModule } from './mailer/mailer.module';
 
 @Module({
   imports: [
     AuthModule,
     AccountsModule,
     DatabaseModule,
+    JwtModule,
+    CommonModule,
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema,
       load: [config],
     }),
-    JwtModule,
-    CommonModule,
+    MailerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

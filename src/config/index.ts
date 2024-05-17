@@ -1,14 +1,15 @@
 import { IConfig } from './interfaces/config.interface';
 import { readFileSync } from 'fs';
 import { Env } from 'src/common/utils';
+import { datasource } from '../db/datasource';
 
 export function config(): IConfig {
   const publicKey = readFileSync(
-    [__dirname + '..', '..', 'keys/public.pem'].join('/'),
+    [__dirname, '..', '..', 'keys/public.pem'].join('/'),
     'utf8'
   );
   const privateKey = readFileSync(
-    [__dirname + '..', '..', 'keys/private.pem'].join('/'),
+    [__dirname, '..', '..', 'keys/private.pem'].join('/'),
     'utf8'
   );
 
@@ -44,6 +45,6 @@ export function config(): IConfig {
         pass: Env.EMAIL_PASSWORD,
       },
     },
-    db: undefined,
+    db: datasource,
   };
 }

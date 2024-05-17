@@ -1,7 +1,7 @@
-import { ICredentials } from '../interfaces/credentials.interface';
+import { ICredentials } from '../interfaces';
 import { Column, Entity } from 'typeorm';
 
-@Entity()
+@Entity({ name: 'credentials' })
 export class CredentialsEmbeddable implements ICredentials {
   @Column({
     type: 'varchar',

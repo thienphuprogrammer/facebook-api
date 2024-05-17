@@ -38,6 +38,12 @@ importers:
       '@nestjs/typeorm':
         specifier: ^10.0.2
         version: 10.0.2(@nestjs/common@10.3.8(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@10.3.8(@nestjs/common@10.3.8(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-express@10.3.8)(reflect-metadata@0.2.2)(rxjs@7.8.1))(reflect-metadata@0.2.2)(rxjs@7.8.1)(typeorm@0.3.20(mysql2@3.9.7)(pg@8.11.5)(ts-node@10.9.2(@types/node@20.12.10)(typescript@5.4.5)))
+      '@types/handlebars':
+        specifier: ^4.1.0
+        version: 4.1.0
+      '@types/nodemailer':
+        specifier: ^6.4.15
+        version: 6.4.15
       bcrypt:
         specifier: ^5.1.1
         version: 5.1.1
@@ -53,12 +59,18 @@ importers:
       graphql:
         specifier: ^16.8.1
         version: 16.8.1
+      handlebars:
+        specifier: ^4.7.8
+        version: 4.7.8
       jsonwebtoken:
         specifier: ^9.0.2
         version: 9.0.2
       mysql2:
         specifier: ^3.9.7
         version: 3.9.7
+      nodemailer:
+        specifier: ^6.9.13
+        version: 6.9.13
       reflect-metadata:
         specifier: ^0.2.0
         version: 0.2.2
@@ -942,6 +954,10 @@ packages:
   '@types/graceful-fs@4.1.9':
     resolution: {integrity: sha512-olP3sd1qOEe5dXTSaFvQG+02VdRXcdytWLAZsAq1PecU8uqQAhkrnbli7DagjtXKW/Bl7YJbUsa8MPcuc8LHEQ==}
 
+  '@types/handlebars@4.1.0':
+    resolution: {integrity: sha512-gq9YweFKNNB1uFK71eRqsd4niVkXrxHugqWFQkeLRJvGjnxsLr16bYtcsG4tOFwmYi0Bax+wCkbf1reUfdl4kA==}
+    deprecated: This is a stub types definition. handlebars provides its own type definitions, so you do not need this installed.
+
   '@types/http-errors@2.0.4':
     resolution: {integrity: sha512-D0CFMMtydbJAegzOyHjtiKPLlvnm3iTZyZRSZoLq2mRhDdmLfIWOCYPfQJ4cu2erKghU++QvjcUjp/5h7hESpA==}
 
@@ -980,6 +996,9 @@ packages:
 
   '@types/node@20.12.10':
     resolution: {integrity: sha512-Eem5pH9pmWBHoGAT8Dr5fdc5rYA+4NAovdM4EktRPVAAiJhmWWfQrA0cFhAbOsQdSfIHjAud6YdkbL69+zSKjw==}
+
+  '@types/nodemailer@6.4.15':
+    resolution: {integrity: sha512-0EBJxawVNjPkng1zm2vopRctuWVCxk34JcIlRuXSf54habUWdz1FB7wHDqOqvDa8Mtpt0Q3LTXQkAs2LNyK5jQ==}
 
   '@types/qs@6.9.15':
     resolution: {integrity: sha512-uXHQKES6DQKKCLh441Xv/dwxOq1TVS3JPUMlEqoEglvlhR6Mxnlew/Xq/LRVHpLyk7iK3zODe1qYHIMltO7XGg==}
@@ -2019,6 +2038,11 @@ packages:
     resolution: {integrity: sha512-59LZHPdGZVh695Ud9lRzPBVTtlX9ZCV150Er2W43ro37wVof0ctenSaskPPjN7lVTIN8mSZt8PHUNKZuNQUuxw==}
     engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
 
+  handlebars@4.7.8:
+    resolution: {integrity: sha512-vafaFqs8MZkRrSX7sFVUdo3ap/eNiLnb4IakshzvP56X5Nr1iGKAIqdX6tMlm6HcNRIkr6AxO5jFEoJzzpT8aQ==}
+    engines: {node: '>=0.4.7'}
+    hasBin: true
+
   has-flag@3.0.0:
     resolution: {integrity: sha512-sKJf1+ceQBr4SMkvQnBDNDtf4TXpVhVGateu0t918bl30FnbE2m4vNLX+VWe/dpjlb+HugGYzW7uQXH98HPEYw==}
     engines: {node: '>=4'}
@@ -2686,6 +2710,10 @@ packages:
 
   node-releases@2.0.14:
     resolution: {integrity: sha512-y10wOWt8yZpqXmOgRo77WaHEmhYQYGNA6y421PKsKYWEK8aW+cqAphborZDhqfyKrbZEN92CN1X2KbafY2s7Yw==}
+
+  nodemailer@6.9.13:
+    resolution: {integrity: sha512-7o38Yogx6krdoBf3jCAqnIN4oSQFx+fMa0I7dK1D+me9kBxx12D+/33wSb+fhOCtIxvYJ+4x4IMEhmhCKfAiOA==}
+    engines: {node: '>=6.0.0'}
 
   nopt@5.0.0:
     resolution: {integrity: sha512-Tbj67rffqceeLpcRXrT7vKAN8CwfPeIBgM7E6iBkmKLV7bEMwpGgYLGv0jACUsECaa/vuxP0IjEont6umdMgtQ==}
@@ -3453,6 +3481,11 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
+  uglify-js@3.17.4:
+    resolution: {integrity: sha512-T9q82TJI9e/C1TAxYvfb16xO120tMVFZrGA3f9/P4424DNu6ypK103y0GPFVa17yotwSyZW5iYXgjYHkGrJW/g==}
+    engines: {node: '>=0.8.0'}
+    hasBin: true
+
   uid@2.0.2:
     resolution: {integrity: sha512-u3xV3X7uzvi5b1MncmZo3i2Aw222Zk1keqLA1YkHldREkAhAqi65wuPfe7lHx8H/Wzy+8CE7S7uS3jekIM5s8g==}
     engines: {node: '>=8'}
@@ -3556,6 +3589,9 @@ packages:
   word-wrap@1.2.5:
     resolution: {integrity: sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA==}
     engines: {node: '>=0.10.0'}
+
+  wordwrap@1.0.0:
+    resolution: {integrity: sha512-gvVzJFlPycKc5dZN4yPkP8w7Dc37BtP1yczEneOb4uq34pXZcvrtRTmWV8W+Ume+XCxKgbjM+nevkyFPMybd4Q==}
 
   wrap-ansi@6.2.0:
     resolution: {integrity: sha512-r6lPcBGxZXlIcymEu7InxDMhdW0KDxpLgoFLcguasxCaJ/SOIZwINatK9KY/tf+ZrlywOKU0UDj3ATXUBfxJXA==}
@@ -4662,6 +4698,10 @@ snapshots:
     dependencies:
       '@types/node': 20.12.10
 
+  '@types/handlebars@4.1.0':
+    dependencies:
+      handlebars: 4.7.8
+
   '@types/http-errors@2.0.4': {}
 
   '@types/istanbul-lib-coverage@2.0.6': {}
@@ -4703,6 +4743,10 @@ snapshots:
   '@types/node@20.12.10':
     dependencies:
       undici-types: 5.26.5
+
+  '@types/nodemailer@6.4.15':
+    dependencies:
+      '@types/node': 20.12.10
 
   '@types/qs@6.9.15': {}
 
@@ -5870,6 +5914,15 @@ snapshots:
 
   graphql@16.8.1: {}
 
+  handlebars@4.7.8:
+    dependencies:
+      minimist: 1.2.8
+      neo-async: 2.6.2
+      source-map: 0.6.1
+      wordwrap: 1.0.0
+    optionalDependencies:
+      uglify-js: 3.17.4
+
   has-flag@3.0.0: {}
 
   has-flag@4.0.0: {}
@@ -6680,6 +6733,8 @@ snapshots:
 
   node-releases@2.0.14: {}
 
+  nodemailer@6.9.13: {}
+
   nopt@5.0.0:
     dependencies:
       abbrev: 1.1.1
@@ -7392,6 +7447,9 @@ snapshots:
 
   typescript@5.4.5: {}
 
+  uglify-js@3.17.4:
+    optional: true
+
   uid@2.0.2:
     dependencies:
       '@lukeed/csprng': 1.1.0
@@ -7498,6 +7556,8 @@ snapshots:
       string-width: 4.2.3
 
   word-wrap@1.2.5: {}
+
+  wordwrap@1.0.0: {}
 
   wrap-ansi@6.2.0:
     dependencies:

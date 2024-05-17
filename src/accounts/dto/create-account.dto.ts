@@ -10,7 +10,7 @@ import {
 import { AccountDetailDto } from './account-detail.dto';
 import { Type } from 'class-transformer';
 
-export class CreateAccountDto {
+export abstract class CreateAccountDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()

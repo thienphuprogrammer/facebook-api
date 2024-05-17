@@ -1,23 +1,28 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsRelations, Not, Repository } from 'typeorm';
-import { AccountDetail } from './entities/account.detail';
-import { Accounts } from './entities/accounts';
+import { IAccountDetail, IAccounts } from './interfaces';
 import { ValidationError } from 'class-validator';
 import { AccountDetailDto } from './dto/account-detail.dto';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { MyValidationError } from '../errors/my-validation-error';
 import { CryptoService } from '@crypto';
 import { CommonService } from '../common/common.service';
+import { AccountsEntity, AccountDetail } from './entities';
+import { isNull, isUndefined } from '../common/utils/validation.util';
 
 @Injectable()
 export class AccountsService {
   constructor(
     private readonly cryptoService: CryptoService,
-    @InjectRepository(Accounts)
-    private readonly accountsRepository: Repository<Accounts>,
+    @InjectRepository(AccountsEntity)
+    private readonly accountsRepository: Repository<IAccounts>,
     @InjectRepository(AccountDetail)
-    private readonly accountDetailRepository: Repository<AccountDetail>,
+    private readonly accountDetailRepository: Repository<IAccountDetail>,
     private readonly commonService: CommonService
   ) {}
 
@@ -64,7 +69,7 @@ export class AccountsService {
 
   async findById(
     accountId: string,
-    relations?: FindOptionsRelations<Accounts>
+    relations?: FindOptionsRelations<AccountsEntity>
   ) {
     const account = await this.accountsRepository.findOne({
       where: { id: accountId },
@@ -128,26 +133,59 @@ export class AccountsService {
     return account ? account : null;
   }
 
-  public async findOneByEmail(email: string): Promise<Accounts | undefined> {
+  public async findOneByEmail(
+    email: string
+  ): Promise<AccountsEntity | undefined> {
     const account = await this.accountsRepository.findOne({
       where: { email: email },
     });
-    this.commonService.checkEntityExistence(account, 'Account');
+    this.commonService.checkEntityExistence(account, 'Accounts');
     return account;
   }
 
-  public async findOneById(id: string): Promise<Accounts | undefined> {
+  public async findOneById(id: string): Promise<AccountsEntity | undefined> {
     const account = await this.accountsRepository.findOne({
       where: { id: id },
     });
-    this.commonService.checkEntityExistence(account, 'Account');
+    this.commonService.checkEntityExistence(account, 'Accounts');
+    return account;
+  }
+
+  public async uncheckedUserByEmail(
+    email: string
+  ): Promise<AccountsEntity | undefined> {
+    const formattedEmail = email.toLowerCase();
+    return this.accountsRepository.findOne({
+      where: { email: formattedEmail },
+    });
+  }
+
+  public async throwUnauthorizedException(
+    account: AccountsEntity | undefined | null
+  ): Promise<void> {
+    if (isUndefined(account) || isNull(account)) {
+      throw new UnauthorizedException('Account not found');
+    }
+  }
+
+  public async findOneByCredentials(
+    id: string,
+    version: number
+  ): Promise<AccountsEntity> {
+    const account = await this.accountsRepository.findOne({
+      where: { id: id },
+    });
+    await this.throwUnauthorizedException(account);
+    if (account.credentials.version !== version) {
+      throw new UnauthorizedException('Invalid version');
+    }
     return account;
   }
 
   async fake100() {
     const accounts = [];
     for (let i = 0; i < 100; i++) {
-      accounts.push(Accounts.fakeOne());
+      accounts.push(AccountsEntity.fakeOne());
     }
     return this.accountsRepository.save(accounts);
   }

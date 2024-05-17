@@ -16,7 +16,7 @@ import {
   IRefreshPayload,
   IRefreshToken,
 } from './interfaces/refresh-token.interface';
-import { IAccounts } from '../accounts/interfaces/accounts.interface';
+import { IAccounts } from '../accounts/interfaces';
 import { TokenTypeEnum } from '../common/utils';
 import { v4 } from 'uuid';
 
