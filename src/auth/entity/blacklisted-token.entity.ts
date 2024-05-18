@@ -1,4 +1,4 @@
-import { AccountsEntity } from 'src/accounts/entities/accounts.entity';
+import { UsersEntity } from '@users';
 import { IBlacklistedToken } from '../interface/blacklisted-token.interface';
 import {
   Column,
@@ -10,17 +10,17 @@ import {
 } from 'typeorm';
 
 @Entity({ name: 'blacklisted_tokens' })
-@Unique(['tokenId', 'accounts'])
+@Unique(['tokenId', 'users'])
 export class BlacklistedTokenEntity implements IBlacklistedToken {
   @PrimaryGeneratedColumn('uuid')
   public tokenId: string;
 
   @PrimaryColumn()
-  @ManyToOne(() => AccountsEntity, (account) => account, {
+  @ManyToOne(() => UsersEntity, (account) => account, {
     onDelete: 'CASCADE',
     // set primary key to be unique
   })
-  public user: AccountsEntity;
+  public user: UsersEntity;
 
   //  @Property({ onCreate: () => new Date() })
   // convert to typeorm

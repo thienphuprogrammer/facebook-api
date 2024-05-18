@@ -1,21 +1,19 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { AuthModule } from '@Auth';
-import { AccountsModule } from '@accounts';
+import { AuthGuard, AuthModule } from '@Auth';
+import { UsersModule } from 'src/users';
 import { DatabaseModule } from './db/database.module';
 import { ConfigModule } from '@nestjs/config/dist';
 import { validationSchema } from './config/config.schema';
 import { config } from './config';
 import { JwtModule } from './jwt/jwt.module';
 import { CommonModule } from './common/common.module';
-import { MailerModule } from './mailer/mailer.module';
-import { CryptoModule } from './crypto/crypto.module';
+import { CacheModule } from '@nestjs/cache-manager';
+import { CacheConfig } from './config/cache.config';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
-    AuthModule,
-    AccountsModule,
+    UsersModule,
     DatabaseModule,
     JwtModule,
     CommonModule,
@@ -24,11 +22,19 @@ import { CryptoModule } from './crypto/crypto.module';
       validationSchema,
       load: [config],
     }),
-    MailerModule,
-    CryptoModule,
+    CacheModule.registerAsync({
+      useClass: CacheConfig,
+      imports: [ConfigModule],
+      isGlobal: true,
+    }),
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+  ],
   exports: [],
 })
 export class AppModule {}

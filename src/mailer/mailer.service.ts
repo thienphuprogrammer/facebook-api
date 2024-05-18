@@ -6,7 +6,8 @@ import { IEmailConfig } from '../jwt/interfaces';
 import { ITemplatedData } from './interface/template-data.interface';
 import { readFileSync } from 'fs';
 import { ITemplates } from './interface/templates.interface';
-import { IAccounts } from '../accounts/interfaces';
+import { IUsers } from '../users/interfaces';
+import Handlebars from 'handlebars';
 
 @Injectable()
 export class MailerService {
@@ -17,7 +18,7 @@ export class MailerService {
   private readonly templates: ITemplates;
 
   constructor(private readonly configService: ConfigService) {
-    const emailConfig = this.configService.get<IEmailConfig>('email');
+    const emailConfig = this.configService.get<IEmailConfig>('emailService');
     this.transport = createTransport(emailConfig);
     this.email = `"My App" <${emailConfig.auth.user}>`;
     this.domain = this.configService.get<string>('domain');
@@ -55,7 +56,7 @@ export class MailerService {
       .catch((e) => this.loggerService.error(`Email error: ${e.message}`));
   }
 
-  public sendConfirmationEmail(account: IAccounts, token: string): void {
+  public sendConfirmationEmail(account: IUsers, token: string): void {
     const { email } = account;
     const subject = 'Confirm your email';
     const html = this.templates.confirmation({
@@ -65,7 +66,7 @@ export class MailerService {
     this.sendEmail(email, subject, html, 'Confirmation email sent');
   }
 
-  public sendResetPasswordEmail(account: IAccounts, token: string): void {
+  public sendResetPasswordEmail(account: IUsers, token: string): void {
     const { email } = account;
     const subject = 'Reset your password';
     const html = this.templates.resetPassword({

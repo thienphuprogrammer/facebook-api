@@ -7,15 +7,15 @@ import {
 } from 'typeorm';
 import { faker } from '@faker-js/faker';
 import { RoleEnum } from '../../common/utils';
-import { IAccounts, IAccountDetail } from '../interfaces';
+import { IUsers, IUserDetails } from '../interfaces';
 import { CredentialsEmbeddable } from './credentials.entity';
 import { IsBoolean, IsEmail, IsString } from 'class-validator';
-import { AccountDetail } from './account-detail.entity';
+import { UserDetails } from './user-details.entity';
 
-@Entity({ name: 'accounts' })
-export class AccountsEntity implements IAccounts {
-  @PrimaryGeneratedColumn('uuid')
-  public id: string;
+@Entity({ name: 'users' })
+export class UsersEntity implements IUsers {
+  @PrimaryGeneratedColumn()
+  public id: number;
 
   @Column({
     type: 'varchar',
@@ -26,6 +26,14 @@ export class AccountsEntity implements IAccounts {
   @IsString()
   @IsEmail()
   public email: string;
+
+  @Column({
+    type: 'varchar',
+    length: 256,
+    nullable: false,
+    unique: true,
+  })
+  public username: string;
 
   @Column({
     type: 'text',
@@ -40,14 +48,14 @@ export class AccountsEntity implements IAccounts {
   })
   public role: RoleEnum;
 
-  @OneToOne(() => AccountDetail, {
+  @OneToOne(() => UserDetails, {
     cascade: true,
     eager: true,
     nullable: true,
     orphanedRowAction: 'delete',
   })
   @JoinColumn()
-  public detail: IAccountDetail;
+  public detail: IUserDetails;
 
   @Column(() => CredentialsEmbeddable, {})
   public credentials: CredentialsEmbeddable = new CredentialsEmbeddable();
@@ -72,12 +80,12 @@ export class AccountsEntity implements IAccounts {
   })
   public updatedAt: Date;
 
-  static fakeOne(): AccountsEntity {
-    const user = new AccountsEntity();
+  static fakeOne(): UsersEntity {
+    const user = new UsersEntity();
     user.email = faker.internet.email();
     user.password = faker.internet.password();
     user.role = RoleEnum.USER;
-    user.detail = AccountDetail.fakeOne(
+    user.detail = UserDetails.fakeOne(
       faker.helpers.arrayElement(['male', 'female'])
     );
     user.confirmed = faker.datatype.boolean();

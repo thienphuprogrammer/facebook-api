@@ -88,6 +88,36 @@ export class CommonService {
   }
 
   /**
+   * Save Entity
+   *
+   * Validates, saves and flushes entities into the DB
+   */
+  public async saveEntity<T extends object>(
+    repo: Repository<T>,
+    entity: T,
+    isNew = false
+  ): Promise<void> {
+    await this.validateEntity(entity);
+
+    if (isNew) {
+      await this.throwDuplicateError(repo.save(entity));
+    } else {
+      await this.throwInternalError(repo.save(entity));
+    }
+  }
+  /**
+   * Remove Entity
+   *
+   * Removes an entities from the DB.
+   */
+  public async removeEntity<T extends object>(
+    repo: Repository<T>,
+    entity: T
+  ): Promise<void> {
+    await this.throwInternalError(repo.remove(entity));
+  }
+
+  /**
    * Format Name
    *
    * Takes a string trims it and capitalizes every word

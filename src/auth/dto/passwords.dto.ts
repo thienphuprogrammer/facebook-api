@@ -10,10 +10,10 @@ export abstract class PasswordsDto {
     message:
       'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character',
   })
-  password1: string;
+  public password1!: string;
 
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  password2: string;
+  public password2!: string;
 }

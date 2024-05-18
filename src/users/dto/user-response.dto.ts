@@ -1,8 +1,8 @@
 import { Expose, Type } from 'class-transformer';
-import { AccountDetailDto } from './account-detail.dto';
+import { UserDetailDto } from './user-detail.dto';
 import { RoleEnum } from 'src/common/utils';
 
-export abstract class AccountResponseDto {
+export class UserResponseDto {
   @Expose()
   id: string;
 
@@ -10,6 +10,6 @@ export abstract class AccountResponseDto {
   role: RoleEnum;
 
   @Expose()
-  @Type(() => AccountDetailDto)
-  detail?: AccountDetailDto;
+  @Type(() => UserDetailDto)
+  detail?: UserDetailDto;
 }

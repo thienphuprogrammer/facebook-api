@@ -15,9 +15,9 @@ import {
   IRefreshPayload,
   IRefreshToken,
 } from './interfaces';
-import { IAccounts } from '../accounts/interfaces';
-import { TokenTypeEnum } from '../common/utils';
+import { IUsers } from '../users/interfaces';
 import { v4 } from 'uuid';
+import { TokenTypeEnum } from './enums/token-type.enum';
 
 @Injectable()
 export class JwtService {
@@ -67,7 +67,7 @@ export class JwtService {
   }
 
   public async generateToken(
-    user: IAccounts,
+    user: IUsers,
     tokenType: TokenTypeEnum,
     domain?: string | null,
     tokenId?: string
