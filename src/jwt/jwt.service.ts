@@ -3,21 +3,16 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config/dist';
+import { ConfigService } from '@nestjs/config';
+import * as jwt from 'jsonwebtoken';
+import { v4 } from 'uuid';
 import { CommonService } from '../common/common.service';
 import { IJwt } from '../config/interfaces/jwt.interface';
-import * as jwt from 'jsonwebtoken';
-import {
-  IAccessPayload,
-  IAccessToken,
-  IEmailPayload,
-  IEmailToken,
-  IRefreshPayload,
-  IRefreshToken,
-} from './interfaces';
-import { IAccounts } from '../accounts/interfaces';
-import { TokenTypeEnum } from '../common/utils';
-import { v4 } from 'uuid';
+import { TokenTypeEnum } from './enums/token-type.enum';
+import { IAccessPayload, IAccessToken } from './interfaces';
+import { IEmailPayload, IEmailToken } from './interfaces';
+import { IRefreshPayload, IRefreshToken } from './interfaces';
+import { IUsers } from '../users/interfaces';
 
 @Injectable()
 export class JwtService {
@@ -66,8 +61,24 @@ export class JwtService {
     });
   }
 
+  private static async throwBadRequest<
+    T extends IAccessToken | IRefreshToken | IEmailToken,
+  >(promise: Promise<T>): Promise<T> {
+    try {
+      return await promise;
+    } catch (error) {
+      if (error instanceof jwt.TokenExpiredError) {
+        throw new BadRequestException('Token expired');
+      }
+      if (error instanceof jwt.JsonWebTokenError) {
+        throw new BadRequestException('Invalid token');
+      }
+      throw new InternalServerErrorException(error);
+    }
+  }
+
   public async generateToken(
-    user: IAccounts,
+    user: IUsers,
     tokenType: TokenTypeEnum,
     domain?: string | null,
     tokenId?: string
@@ -76,8 +87,9 @@ export class JwtService {
       issuer: this.issuer,
       subject: user.email,
       audience: domain ?? this.domain,
-      algorithm: 'HS256', // only needs a secret
+      algorithm: 'HS256',
     };
+
     switch (tokenType) {
       case TokenTypeEnum.ACCESS:
         const { privateKey, time: accessTime } = this.jwtConfig.access;
@@ -85,7 +97,7 @@ export class JwtService {
           JwtService.generateTokenAsync({ id: user.id }, privateKey, {
             ...jwtOptions,
             expiresIn: accessTime,
-            algorithm: 'RS256', // to use public and private key
+            algorithm: 'RS256',
           })
         );
       case TokenTypeEnum.REFRESH:
@@ -118,22 +130,6 @@ export class JwtService {
             }
           )
         );
-    }
-  }
-
-  private static async throwBadRequest<
-    T extends IAccessToken | IRefreshToken | IEmailToken,
-  >(promise: Promise<T>): Promise<T> {
-    try {
-      return await promise;
-    } catch (error) {
-      if (error instanceof jwt.TokenExpiredError) {
-        throw new BadRequestException('Token expired');
-      }
-      if (error instanceof jwt.JsonWebTokenError) {
-        throw new BadRequestException('Invalid token');
-      }
-      throw new InternalServerErrorException(error);
     }
   }
 

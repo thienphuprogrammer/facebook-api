@@ -1,9 +1,9 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { faker } from '@faker-js/faker';
-import { IAccountDetail } from '../interfaces';
+import { IUserDetails } from '../interfaces';
 
 @Entity({ name: 'account_details' })
-export class AccountDetail implements IAccountDetail {
+export class AccountDetail implements IUserDetails {
   @PrimaryGeneratedColumn()
   public id: number;
 

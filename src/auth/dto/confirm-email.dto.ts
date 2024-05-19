@@ -1,8 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsJWT, IsString } from 'class-validator';
-import { PasswordsDto } from './passwords.dto';
 
-export abstract class ResetPasswordDto extends PasswordsDto {
+export abstract class ConfirmEmailDto {
   @ApiProperty({
     description: 'The JWT token sent to the user email',
     example:
@@ -11,5 +10,5 @@ export abstract class ResetPasswordDto extends PasswordsDto {
   })
   @IsString()
   @IsJWT()
-  public resetToken!: string;
+  public confirmationToken!: string;
 }

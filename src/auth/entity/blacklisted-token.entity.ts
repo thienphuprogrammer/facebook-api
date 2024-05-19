@@ -1,4 +1,4 @@
-import { AccountsEntity } from 'src/accounts/entities/accounts.entity';
+import { UsersEntity } from '../../users/entities/users.entity';
 import { IBlacklistedToken } from '../interface/blacklisted-token.interface';
 import {
   Column,
@@ -16,11 +16,11 @@ export class BlacklistedTokenEntity implements IBlacklistedToken {
   public tokenId: string;
 
   @PrimaryColumn()
-  @ManyToOne(() => AccountsEntity, (account) => account, {
+  @ManyToOne(() => UsersEntity, (account) => account, {
     onDelete: 'CASCADE',
     // set primary key to be unique
   })
-  public user: AccountsEntity;
+  public user: UsersEntity;
 
   //  @Property({ onCreate: () => new Date() })
   // convert to typeorm

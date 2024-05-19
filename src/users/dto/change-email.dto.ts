@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsString, Length } from 'class-validator';
+import { PasswordDto } from './password.dto';
 
-export abstract class EmailDto {
+export abstract class ChangeEmailDto extends PasswordDto {
   @ApiProperty({
     description: 'The email of the user',
     example: 'someone@gmail.com',

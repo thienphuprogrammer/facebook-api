@@ -7,15 +7,16 @@ import {
 } from 'typeorm';
 import { faker } from '@faker-js/faker';
 import { RoleEnum } from '../../common/utils';
-import { IAccounts, IAccountDetail } from '../interfaces';
+import { IUsers, IUserDetails } from '../interfaces';
 import { CredentialsEmbeddable } from './credentials.entity';
-import { IsBoolean, IsEmail, IsString } from 'class-validator';
-import { AccountDetail } from './account-detail.entity';
+import { IsBoolean, IsEmail, IsString, Length, Matches } from 'class-validator';
+import { AccountDetail } from './user-details.entity';
+import { NAME_REGEX, SLUG_REGEX } from '../../common/consts/regex.const';
 
-@Entity({ name: 'accounts' })
-export class AccountsEntity implements IAccounts {
-  @PrimaryGeneratedColumn('uuid')
-  public id: string;
+@Entity({ name: 'users' })
+export class UsersEntity implements IUsers {
+  @PrimaryGeneratedColumn()
+  public id: number;
 
   @Column({
     type: 'varchar',
@@ -26,6 +27,28 @@ export class AccountsEntity implements IAccounts {
   @IsString()
   @IsEmail()
   public email: string;
+
+  @Column({
+    type: 'text',
+    length: 60,
+  })
+  @IsString()
+  @Matches(NAME_REGEX, {
+    message: 'Name must not have special characters',
+  })
+  public name: string;
+
+  @Column({
+    type: 'varchar',
+    length: 106,
+    unique: true,
+  })
+  @Length(3, 106)
+  @IsString()
+  @Matches(SLUG_REGEX, {
+    message: 'Username must be a valid slugs',
+  })
+  public username: string;
 
   @Column({
     type: 'text',
@@ -47,7 +70,7 @@ export class AccountsEntity implements IAccounts {
     orphanedRowAction: 'delete',
   })
   @JoinColumn()
-  public detail: IAccountDetail;
+  public detail: IUserDetails;
 
   @Column(() => CredentialsEmbeddable, {})
   public credentials: CredentialsEmbeddable = new CredentialsEmbeddable();
@@ -72,8 +95,8 @@ export class AccountsEntity implements IAccounts {
   })
   public updatedAt: Date;
 
-  static fakeOne(): AccountsEntity {
-    const user = new AccountsEntity();
+  static fakeOne(): UsersEntity {
+    const user = new UsersEntity();
     user.email = faker.internet.email();
     user.password = faker.internet.password();
     user.role = RoleEnum.USER;

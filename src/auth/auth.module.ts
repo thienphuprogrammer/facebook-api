@@ -1,7 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { AccountsModule } from '@accounts';
+import { UsersModule } from '../users';
 import { CryptoModule } from '@crypto';
 import { MailerModule } from '../mailer/mailer.module';
 import { JwtModule } from '../jwt/jwt.module';
@@ -13,7 +13,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
   providers: [AuthService],
   imports: [
     CryptoModule.register(),
-    forwardRef(() => AccountsModule),
+    forwardRef(() => UsersModule),
     TypeOrmModule.forFeature([BlacklistedTokenEntity]),
     MailerModule,
     JwtModule,

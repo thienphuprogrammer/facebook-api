@@ -1,10 +1,24 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
-import { PasswordsDto } from './passwords.dto';
+import { IsString, Length, MinLength } from 'class-validator';
 
-export abstract class SignInDto extends PasswordsDto {
-  @ApiProperty()
+export abstract class SignInDto {
+  @ApiProperty({
+    description: 'Username or email',
+    examples: ['john.doe', 'john.doe@gmail.com'],
+    minLength: 3,
+    maxLength: 255,
+    type: String,
+  })
   @IsString()
-  @IsNotEmpty()
-  readonly email: string;
+  @Length(3, 255)
+  public emailOrUsername: string;
+
+  @ApiProperty({
+    description: "User's password",
+    minLength: 1,
+    type: String,
+  })
+  @IsString()
+  @MinLength(1)
+  public password: string;
 }
