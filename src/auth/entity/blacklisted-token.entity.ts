@@ -1,5 +1,5 @@
 import { UsersEntity } from '../../users/entities/users.entity';
-import { IBlacklistedToken } from '../interface/blacklisted-token.interface';
+import { IBlacklistedToken } from '../interfaces/blacklisted-token.interface';
 import {
   Column,
   Entity,

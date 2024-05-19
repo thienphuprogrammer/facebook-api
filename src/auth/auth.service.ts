@@ -1,4 +1,9 @@
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
+/*
+  Free and Open Source - GNU LGPLv3
+  Copyright © 2023
+  Afonso Barracha
+*/
+
 import {
   BadRequestException,
   Inject,
@@ -14,21 +19,21 @@ import { SLUG_REGEX } from '../common/consts/regex.const';
 import { IMessage } from '../common/interfaces/message.interface';
 import { isNull, isUndefined } from '../common/utils/validation.util';
 import { TokenTypeEnum } from '../jwt/enums/token-type.enum';
-import { IEmailToken } from '../jwt/interfaces/email-token.interface';
-import { IRefreshToken } from '../jwt/interfaces/refresh-token.interface';
+import { IEmailToken } from '../jwt/interfaces';
+import { IRefreshToken } from '../jwt/interfaces';
 import { JwtService } from '../jwt/jwt.service';
 import { MailerService } from '../mailer/mailer.service';
-import { UserEntity } from '../users/entities/users.entity';
-import { OAuthProvidersEnum } from '../users/enums/oauth-providers.enum';
+import { UsersEntity } from '@users';
 import { ICredentials } from '../users/interfaces';
 import { UsersService } from '@users';
-import { ChangePasswordDto } from './dtos/change-password.dto';
-import { ConfirmEmailDto } from './dtos/confirm-email.dto';
-import { EmailDto } from './dtos/email.dto';
-import { ResetPasswordDto } from './dtos/reset-password.dto';
-import { SignInDto } from './dtos/sign-in.dto';
-import { SignUpDto } from './dtos/sign-up.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { ConfirmEmailDto } from './dto/confirm-email.dto';
+import { EmailDto } from './dto/email.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { SignInDto } from './dto/sign-in.dto';
+import { SignUpDto } from './dto/sign-up.dto';
 import { IAuthResult } from './interfaces/auth-result.interface';
+import { CACHE_MANAGER } from '@nestjs/common/cache';
 
 @Injectable()
 export class AuthService {
@@ -44,12 +49,7 @@ export class AuthService {
   public async signUp(dto: SignUpDto, domain?: string): Promise<IMessage> {
     const { name, email, password1, password2 } = dto;
     this.comparePasswords(password1, password2);
-    const user = await this.usersService.create(
-      OAuthProvidersEnum.LOCAL,
-      email,
-      name,
-      password1
-    );
+    const user = await this.usersService.create(email, name, password1);
     const confirmationToken = await this.jwtService.generateToken(
       user,
       TokenTypeEnum.CONFIRMATION,
@@ -69,8 +69,10 @@ export class AuthService {
       TokenTypeEnum.CONFIRMATION
     );
     const user = await this.usersService.confirmEmail(id, version);
-    const [accessToken, refreshToken] =
-      await this.jwtService.generateAuthTokens(user, domain);
+    const [accessToken, refreshToken] = await this.generateAuthTokens(
+      user,
+      domain
+    );
     return { user, accessToken, refreshToken };
   }
 
@@ -93,8 +95,10 @@ export class AuthService {
       );
     }
 
-    const [accessToken, refreshToken] =
-      await this.jwtService.generateAuthTokens(user, domain);
+    const [accessToken, refreshToken] = await this.generateAuthTokens(
+      user,
+      domain
+    );
     return { user, accessToken, refreshToken };
   }
 
@@ -109,10 +113,10 @@ export class AuthService {
       );
     await this.checkIfTokenIsBlacklisted(id, tokenId);
     const user = await this.usersService.findOneByCredentials(id, version);
-    const [accessToken, newRefreshToken] = await this.jwtService.generateToken(
+    const [accessToken, newRefreshToken] = await this.generateAuthTokens(
       user,
-      TokenTypeEnum.ACCESS,
-      domain
+      domain,
+      tokenId
     );
     return { user, accessToken, refreshToken: newRefreshToken };
   }
@@ -165,11 +169,13 @@ export class AuthService {
     this.comparePasswords(password1, password2);
     const user = await this.usersService.updatePassword(
       userId,
-      password1,
-      password
+      password,
+      password1
     );
-    const [accessToken, refreshToken] =
-      await this.jwtService.generateAuthTokens(user, domain);
+    const [accessToken, refreshToken] = await this.generateAuthTokens(
+      user,
+      domain
+    );
     return { user, accessToken, refreshToken };
   }
 
@@ -249,7 +255,7 @@ export class AuthService {
 
   private async userByEmailOrUsername(
     emailOrUsername: string
-  ): Promise<UserEntity> {
+  ): Promise<UsersEntity> {
     if (emailOrUsername.includes('@')) {
       if (!isEmail(emailOrUsername)) {
         throw new BadRequestException('Invalid email');
@@ -267,5 +273,26 @@ export class AuthService {
     }
 
     return this.usersService.findOneByUsername(emailOrUsername, true);
+  }
+
+  private async generateAuthTokens(
+    user: UsersEntity,
+    domain?: string,
+    tokenId?: string
+  ): Promise<[string, string]> {
+    return Promise.all([
+      this.jwtService.generateToken(
+        user,
+        TokenTypeEnum.ACCESS,
+        domain,
+        tokenId
+      ),
+      this.jwtService.generateToken(
+        user,
+        TokenTypeEnum.REFRESH,
+        domain,
+        tokenId
+      ),
+    ]);
   }
 }
