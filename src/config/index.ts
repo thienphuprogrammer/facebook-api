@@ -1,7 +1,7 @@
 import { IConfig } from './interfaces/config.interface';
 import { readFileSync } from 'fs';
 import { Env } from 'src/common/utils';
-import { redisUrlParser } from '../common/utils/redis-url-parser.util';
+import { datasource } from '../db/datasource';
 
 export function config(): IConfig {
   const publicKey = readFileSync(
@@ -45,10 +45,6 @@ export function config(): IConfig {
         pass: Env.EMAIL_PASSWORD,
       },
     },
-    redis: redisUrlParser(Env.REDIS_URL),
-    throttler: {
-      ttl: Env.THROTTLE_TTL,
-      limit: Env.THROTTLE_LIMIT,
-    },
+    db: datasource,
   };
 }

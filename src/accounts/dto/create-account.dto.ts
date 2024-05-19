@@ -7,10 +7,10 @@ import {
   MaxLength,
   ValidateNested,
 } from 'class-validator';
-import { UserDetailDto } from './user-detail.dto';
+import { AccountDetailDto } from './account-detail.dto';
 import { Type } from 'class-transformer';
 
-export abstract class CreateUserDto {
+export abstract class CreateAccountDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
@@ -25,9 +25,9 @@ export abstract class CreateUserDto {
   @MaxLength(50)
   password: string;
 
-  @ApiProperty({ type: UserDetailDto, required: false })
+  @ApiProperty({ type: AccountDetailDto, required: false })
   @IsOptional()
   @ValidateNested()
-  @Type(() => UserDetailDto)
-  detail?: UserDetailDto;
+  @Type(() => AccountDetailDto)
+  detail?: AccountDetailDto;
 }

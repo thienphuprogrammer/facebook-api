@@ -4,5 +4,5 @@ import { PasswordsDto } from './passwords.dto';
 export abstract class ChangePasswordDto extends PasswordsDto {
   @IsString()
   @MinLength(1)
-  public password!: string;
+  public password1!: string;
 }

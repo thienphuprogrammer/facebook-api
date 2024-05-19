@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsDate, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Expose } from 'class-transformer';
 
-export abstract class UserDetailDto {
+export abstract class AccountDetailDto {
   @ApiProperty()
   @IsString()
   @IsOptional()

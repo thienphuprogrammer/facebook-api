@@ -1,10 +1,11 @@
-import { DynamicModule, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { CryptoService } from './crypto.service';
 import { generateKeyPairSync } from 'node:crypto';
 import * as fs from 'fs';
-import { Env } from '../common/utils';
 
-@Module({})
+@Module({
+  providers: [CryptoService],
+})
 export class CryptoModule {
   static generateKeyPair(
     keysDir: string,
@@ -26,40 +27,5 @@ export class CryptoModule {
       publicKeyPath,
       publicKey.export({ format: 'pem', type: 'pkcs1' })
     );
-  }
-
-  static register(): DynamicModule {
-    const keysDir = Env.KEYS_DIR_PATH;
-    const privateKeyPath = `${keysDir}/private.pem`;
-    const publicKeyPath = `${keysDir}/public.pem`;
-
-    if (
-      !(
-        fs.existsSync(privateKeyPath) &&
-        fs.existsSync(publicKeyPath) &&
-        fs.existsSync(keysDir)
-      )
-    ) {
-      this.generateKeyPair(keysDir, privateKeyPath, publicKeyPath);
-    }
-
-    const privateKey = fs.readFileSync(privateKeyPath);
-    const publicKey = fs.readFileSync(publicKeyPath);
-
-    return {
-      module: CryptoModule,
-      providers: [
-        CryptoService,
-        {
-          provide: 'PRIVATE_KEY',
-          useValue: privateKey,
-        },
-        {
-          provide: 'PUBLIC_KEY',
-          useValue: publicKey,
-        },
-      ],
-      exports: [CryptoService],
-    };
   }
 }

@@ -20,7 +20,7 @@
     "noFallthroughCasesInSwitch": false,
     "paths": {
       "@entities": ["src/../entities/*.ts"],
-      "@users": ["src/users"],
+      "@accounts": ["src/accounts"],
       "@Auth": ["src/auth"],
       "@crypto": ["src/crypto"],
       "@utils": ["src/utils"]

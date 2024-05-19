@@ -1,7 +1,7 @@
-import { IUsers } from '../../users/interfaces';
+import { IAccounts } from '../../accounts/interfaces';
 
 export interface IBlacklistedToken {
   tokenId: string;
-  user: IUsers;
+  user: IAccounts;
   createdAt: Date;
 }

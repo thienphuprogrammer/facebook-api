@@ -1,4 +1,4 @@
-export interface IUserDetails {
+export interface IAccountDetail {
   id: number;
   avatar: string;
   age: number;

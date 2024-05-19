@@ -1,9 +1,9 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { faker } from '@faker-js/faker';
-import { IUserDetails } from '../interfaces';
+import { IAccountDetail } from '../interfaces';
 
-@Entity({ name: 'user_details' })
-export class UserDetails implements IUserDetails {
+@Entity({ name: 'account_details' })
+export class AccountDetail implements IAccountDetail {
   @PrimaryGeneratedColumn()
   public id: number;
 
@@ -54,7 +54,7 @@ export class UserDetails implements IUserDetails {
   public number_phone: string;
 
   static fakeOne(gender: 'male' | 'female') {
-    const detail = new UserDetails();
+    const detail = new AccountDetail();
     detail.avatar = faker.image.avatar();
     detail.age = faker.number.int({ min: 18, max: 100 });
     detail.birthday = faker.date.past();

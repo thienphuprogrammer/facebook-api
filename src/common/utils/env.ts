@@ -48,11 +48,4 @@ export class Env {
   static readonly DOMAIN = process.env.DOMAIN || 'localhost:3000';
   static readonly NODE_ENV = process.env.NODE_ENV || 'development';
   static readonly APP_ID = process.env.APP_ID || 'app';
-
-  //Redis
-  static readonly REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
-
-  //Throttler
-  static readonly THROTTLE_TTL = parseInt(process.env.THROTTLE_TTL) || 60;
-  static readonly THROTTLE_LIMIT = parseInt(process.env.THROTTLE_LIMIT) || 10;
 }

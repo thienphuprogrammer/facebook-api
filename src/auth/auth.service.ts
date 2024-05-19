@@ -1,38 +1,37 @@
 import {
   BadRequestException,
-  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UsersEntity, UsersService } from 'src/users';
+import { AccountsEntity, AccountsService } from '@accounts';
 import { SignInDto } from './dto/sign-in.dto';
+import { TokenTypeEnum } from 'src/common/utils';
 import { MailerService } from '../mailer/mailer.service';
 import { JwtService } from '../jwt/jwt.service';
 import { CommonService } from '../common/common.service';
+import { BlacklistedTokenEntity } from './entity/blacklisted-token.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { IAuthResult } from './interface/auth-result.interface';
 import { IEmailToken, IRefreshToken } from '../jwt/interfaces';
 import { isEmail } from 'class-validator';
 import { compare } from 'bcrypt';
-import { ICredentials } from '../users/interfaces';
+import { ICredentials } from '../accounts/interfaces';
 import dayjs from 'dayjs';
 import { IMessage } from '../config/interfaces/message.interface';
 import { EmailDto } from './dto/email.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
-import { ChangePasswordDto } from './dto/change-password.dto';
 import { isNull, isUndefined } from '../common/utils/validation.util';
-import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
-import { TokenTypeEnum } from '../jwt/enums/token-type.enum';
-import { SignUpDto } from './dto/sign-up.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @Inject(CACHE_MANAGER)
-    private readonly cacheManager: Cache,
-    private usersService: UsersService,
+    private accountsService: AccountsService,
     private readonly commonService: CommonService,
     private readonly jwtService: JwtService,
-    private readonly mailerService: MailerService
+    private readonly mailerService: MailerService,
+    @InjectRepository(BlacklistedTokenEntity)
+    private readonly blacklistedTokensRepository: Repository<BlacklistedTokenEntity>
   ) {}
 
   private comparePasswords(password1: string, password2: string): void {
@@ -41,56 +40,44 @@ export class AuthService {
     }
   }
 
-  public async signUp(dto: SignUpDto, domain?: string): Promise<IMessage> {
-    const { email, password1, password2 } = dto;
-    const user = await this.usersService.create(email, password1);
-    const confirmationToken = await this.jwtService.generateToken(
-      user,
-      TokenTypeEnum.CONFIRMATION,
-      domain
-    );
-    this.mailerService.sendConfirmationEmail(user, confirmationToken);
-    return this.commonService.generateMessage('Registration successful');
-  }
-
   public async SignIn(dto: SignInDto, domain?: string): Promise<IAuthResult> {
     const { email, password1 } = dto;
-    const user = await this.userByEmail(email);
-    if (!user) {
+    const account = await this.accountByEmail(email);
+    if (!account) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    if (!(await compare(password1, user.password))) {
+    if (!(await compare(password1, account.password))) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    if (!user.confirmed) {
+    if (!account.confirmed) {
       const confirmationToken = await this.jwtService.generateToken(
-        user,
+        account,
         TokenTypeEnum.CONFIRMATION,
         domain
       );
-      this.mailerService.sendConfirmationEmail(user, confirmationToken);
+      this.mailerService.sendConfirmationEmail(account, confirmationToken);
       throw new UnauthorizedException(
         'Please confirm your email address before signing in'
       );
     }
     const [accessToken, refreshToken] = await this.generateAuthTokens(
-      user,
+      account,
       domain
     );
     return {
-      user: user,
+      account,
       accessToken,
       refreshToken,
     };
   }
 
-  private async userByEmail(email: string): Promise<UsersEntity> {
+  private async accountByEmail(email: string): Promise<AccountsEntity> {
     if (!isEmail(email)) {
       throw new BadRequestException('Invalid email');
     }
-    return this.usersService.findOneByEmail(email);
+    return this.accountsService.findOneByEmail(email);
   }
 
   private async checkLastPassword(
@@ -135,41 +122,34 @@ export class AuthService {
   }
 
   public async logout(refreshToken: string): Promise<IMessage> {
-    const { id, tokenId, exp } =
-      await this.jwtService.verifyToken<IRefreshToken>(
-        refreshToken,
-        TokenTypeEnum.REFRESH
-      );
-    await this.blacklistToken(id, tokenId, exp);
+    const { id, tokenId } = await this.jwtService.verifyToken<IRefreshToken>(
+      refreshToken,
+      TokenTypeEnum.REFRESH
+    );
+    await this.blacklistToken(id, tokenId);
     return this.commonService.generateMessage('Logged out successfully');
   }
 
-  private async blacklistToken(
-    userId: number,
-    tokenId: string,
-    exp: number
-  ): Promise<void> {
-    const now = dayjs().unix();
-    const ttl = (exp - now) * 1000;
-    if (ttl > 0) {
-      await this.commonService.throwInternalError(
-        this.cacheManager.set(`blacklist:${userId}:${tokenId}`, now, ttl)
-      );
-    }
+  private async blacklistToken(id: string, tokenId: string): Promise<void> {
+    const blacklistedToken = this.blacklistedTokensRepository.create({
+      user: { id },
+      tokenId,
+    });
+    await this.blacklistedTokensRepository.save(blacklistedToken);
   }
 
   public async resetPasswordEmail(
     dto: EmailDto,
     domain?: string
   ): Promise<IMessage> {
-    const user = await this.usersService.uncheckedUserByEmail(dto.email);
-    if (!isNull(user) && !isUndefined(user)) {
+    const account = await this.accountsService.uncheckedUserByEmail(dto.email);
+    if (!isNull(account) && !isUndefined(account)) {
       const resetToken = await this.jwtService.generateToken(
-        user,
+        account,
         TokenTypeEnum.RESET_PASSWORD,
         domain
       );
-      this.mailerService.sendResetPasswordEmail(user, resetToken);
+      this.mailerService.sendResetPasswordEmail(account, resetToken);
     }
     return this.commonService.generateMessage(
       'If the email is registered, a reset password link will be sent'
@@ -183,42 +163,6 @@ export class AuthService {
       TokenTypeEnum.RESET_PASSWORD
     );
     this.comparePasswords(password1, password2);
-    await this.usersService.resetPassword(id, version, password1);
-    return this.commonService.generateMessage('Password reset successfully');
-  }
-
-  public async changePassword(
-    userId: number,
-    dto: ChangePasswordDto
-  ): Promise<IAuthResult> {
-    const { password1, password2, password } = dto;
-    this.comparePasswords(password1, password2);
-    const user = await this.usersService.updatePassword(
-      userId,
-      password,
-      password1
-    );
-    const [accessToken, refreshToken] = await this.generateAuthTokens(user);
-    return { user, accessToken, refreshToken };
-  }
-
-  public async updatePassword(
-    userId: number,
-    dto: ChangePasswordDto,
-    domain?: string
-  ): Promise<IAuthResult> {
-    const { password1, password2, password } = dto;
-    this.comparePasswords(password1, password2);
-    const user = await this.usersService.updatePassword(
-      userId,
-      password,
-      password1
-    );
-    const [accessToken, refreshToken] = await this.generateAuthTokens(
-      user,
-      domain
-    );
-    return { user, accessToken, refreshToken };
   }
 
   async loginWithGoogle() {
@@ -226,19 +170,19 @@ export class AuthService {
   }
 
   private async generateAuthTokens(
-    user: UsersEntity,
+    account: AccountsEntity,
     domain?: string,
     tokenId?: string
   ): Promise<[string, string]> {
     return Promise.all([
       this.jwtService.generateToken(
-        user,
+        account,
         TokenTypeEnum.ACCESS,
         domain,
         tokenId
       ),
       this.jwtService.generateToken(
-        user,
+        account,
         TokenTypeEnum.REFRESH,
         domain,
         tokenId
@@ -257,26 +201,27 @@ export class AuthService {
       );
 
     await this.checkIfTokenIsBlacklisted(id, tokenId);
-    const [user] = await Promise.all([
-      this.usersService.findOneByCredentials(id, version),
+    const [account] = await Promise.all([
+      this.accountsService.findOneByCredentials(id, version),
     ]);
     const [accessToken, newRefreshToken] = await this.generateAuthTokens(
-      user,
+      account,
       domain,
       tokenId
     );
-    return { user, accessToken, refreshToken: newRefreshToken };
+    return { account, accessToken, refreshToken: newRefreshToken };
   }
 
   private async checkIfTokenIsBlacklisted(
-    userId: number,
+    accountId: string,
     tokenId: string
   ): Promise<void> {
-    const time = await this.cacheManager.get<number>(
-      `blacklist:${userId}:${tokenId}`
-    );
-    if (!isUndefined(time) && !isNull(time)) {
-      throw new UnauthorizedException('Invalid token');
+    const count = await this.blacklistedTokensRepository.count({
+      where: { tokenId, user: { id: accountId } },
+    });
+
+    if (count > 0) {
+      throw new UnauthorizedException('Token is invalid');
     }
   }
 }

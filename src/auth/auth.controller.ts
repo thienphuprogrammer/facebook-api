@@ -4,169 +4,44 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Patch,
   Post,
-  Req,
-  Res,
-  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ApiTags } from '@nestjs/swagger';
-import { ThrottlerGuard } from '@nestjs/throttler';
-import { UsersService } from '@users';
-import { ConfigService } from '@nestjs/config/dist';
-import { isUndefined } from '../common/utils/validation.util';
-import { Request, Response } from 'express-serve-static-core';
-import { Public } from '../decorators/public.decorator';
-import { Origin } from '../decorators/origin.decorator';
-import { SignUpDto } from './dto/sign-up.dto';
-import { IMessage } from '../config/interfaces/message.interface';
+import { AuthGuard } from './auth.guard';
 import { SignInDto } from './dto/sign-in.dto';
-import { AuthResponseMapper } from './mappers/auth-response.mapper';
-import { ConfirmEmailDto } from './dto/confirm-email.dto';
-import { EmailDto } from './dto/email.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
-import { CurrentUser } from '../decorators/current-user.decorator';
-import { ChangePasswordDto } from './dto/change-password.dto';
-import { IAuthResponseUser } from './interface/auth-response-user.interface';
-import { AuthResponseUserMapper } from './mappers/auth-response-user.mapper';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import ResponseObject from '../common/utils/response-object';
 
 @Controller('auth')
 @ApiTags('auth')
-@UseGuards(ThrottlerGuard)
 export class AuthController {
-  private readonly cookiePath = '/auth';
-  private readonly cookieName: string;
-  private readonly refreshTime: number;
-  private readonly testing: boolean;
+  constructor(private readonly authService: AuthService) {}
 
-  constructor(
-    private readonly authService: AuthService,
-    private readonly usersService: UsersService,
-    private readonly configService: ConfigService
-  ) {
-    this.cookieName = this.configService.get<string>('REFRESH_COOKIE');
-    this.refreshTime = this.configService.get<number>('jwt.refresh.time');
-    this.testing = this.configService.get<string>('NODE_ENV') !== 'production';
-  }
-
-  private refreshTokenFromReq(req: Request): string {
-    const token: string | undefined = req.signedCookies[this.cookieName];
-
-    if (isUndefined(token)) {
-      throw new UnauthorizedException();
+  @HttpCode(HttpStatus.OK)
+  @Post('login')
+  async login(@Body() dto: SignInDto) {
+    const [data, error] = await this.authService.SignIn(dto);
+    if (!data) {
+      return new ResponseObject(
+        HttpStatus.UNAUTHORIZED,
+        'Invalid email or password',
+        null,
+        error
+      );
     }
-
-    return token;
+    return new ResponseObject(HttpStatus.OK, 'Login success', data, null);
   }
 
-  private saveRefreshCookie(res: Response, refreshToken: string): Response {
-    return res.cookie(this.cookieName, refreshToken, {
-      secure: !this.testing,
-      httpOnly: true,
-      signed: true,
-      path: this.cookiePath,
-      expires: new Date(Date.now() + this.refreshTime * 1000),
-    });
+  @UseGuards(AuthGuard)
+  @Get('profile')
+  @ApiBearerAuth()
+  getProfile({ req }: { req: any }) {
+    return req.user;
   }
 
-  @Public()
-  @Post('/sign-up')
-  async signUp(
-    @Origin() origin: string | undefined,
-    @Body() signUpDto: SignUpDto
-  ): Promise<IMessage> {
-    return this.authService.signUp(signUpDto, origin);
-  }
-
-  @Public()
-  @Post('/sign-in')
-  public async signIn(
-    @Res() res: Response,
-    @Origin() origin: string | undefined,
-    @Body() singInDto: SignInDto
-  ): Promise<void> {
-    const result = await this.authService.SignIn(singInDto, origin);
-    this.saveRefreshCookie(res, result.refreshToken)
-      .status(HttpStatus.OK)
-      .json(AuthResponseMapper.map(result));
-  }
-
-  @Public()
-  @Post('/refresh-access')
-  public async refreshAccess(
-    @Req() req: Request,
-    @Res() res: Response
-  ): Promise<void> {
-    const refreshToken = this.refreshTokenFromReq(req);
-    const result = await this.authService.refreshTokenAccess(
-      refreshToken,
-      req.headers.origin
-    );
-    this.saveRefreshCookie(res, result.refreshToken)
-      .status(HttpStatus.OK)
-      .json(AuthResponseMapper.map(result));
-  }
-
-  @Post('/logout')
-  @HttpCode(HttpStatus.OK)
-  public async logout(
-    @Req() req: Request,
-    @Res() res: Response
-  ): Promise<void> {
-    const refreshToken = this.refreshTokenFromReq(req);
-    const message = await this.authService.logout(refreshToken);
-    res
-      .clearCookie(this.cookieName, { path: this.cookiePath })
-      .status(HttpStatus.OK)
-      .json(message);
-  }
-  @Public()
-  @Post('/confirm-email')
-  public async confirmEmail(
-    @Body() dto: ConfirmEmailDto,
-    @Res() res: Response
-  ): Promise<void> {
-    // // const result = await this.authService.confirmEmail(dto);
-    // this.saveRefreshCookie(res, result.refreshToken)
-    //   .status(HttpStatus.OK)
-    //   .json(AuthResponseMapper.map(result));
-  }
-
-  @Post('/forgot-password')
-  @HttpCode(HttpStatus.OK)
-  public async forgotPassword(
-    @Origin() origin: string | undefined,
-    @Body() emailDto: EmailDto
-  ): Promise<IMessage> {
-    return this.authService.resetPasswordEmail(emailDto, origin);
-  }
-  @Public()
-  @Post('/reset-password')
-  @HttpCode(HttpStatus.OK)
-  public async resetPassword(
-    @Body() resetPasswordDto: ResetPasswordDto
-  ): Promise<IMessage> {
-    return this.authService.resetPassword(resetPasswordDto);
-  }
-
-  @Patch('/update-password')
-  public async updatePassword(
-    @CurrentUser() userId: number,
-    @Origin() origin: string | undefined,
-    @Body() dto: ChangePasswordDto,
-    @Res() res: Response
-  ): Promise<void> {
-    const result = await this.authService.updatePassword(userId, dto, origin);
-    this.saveRefreshCookie(res, result.refreshToken)
-      .status(HttpStatus.OK)
-      .json(AuthResponseMapper.map(result));
-  }
-
-  @Get('/me')
-  public async getMe(@CurrentUser() id: number): Promise<IAuthResponseUser> {
-    const user = await this.usersService.findOneById(id);
-    return AuthResponseUserMapper.map(user);
+  @Get('login-with-google')
+  loginWithGoogle() {
+    return this.authService.loginWithGoogle();
   }
 }
