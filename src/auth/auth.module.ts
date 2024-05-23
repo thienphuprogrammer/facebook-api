@@ -1,23 +1,27 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { UsersModule } from '../users';
+import { UsersModule } from '@users';
 import { CryptoModule } from '@crypto';
 import { MailerModule } from '../mailer/mailer.module';
 import { JwtModule } from '../jwt/jwt.module';
-import { BlacklistedTokenEntity } from './entity/blacklisted-token.entity';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { ConfigModule } from '@nestjs/config/dist';
+import { ThrottlerConfig } from '../config/throttler.config';
+import { AuthResolver } from './auth.resolver';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, AuthResolver],
   imports: [
     CryptoModule.register(),
     forwardRef(() => UsersModule),
-    TypeOrmModule.forFeature([BlacklistedTokenEntity]),
     MailerModule,
     JwtModule,
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      useClass: ThrottlerConfig,
+    }),
   ],
-  exports: [AuthService],
 })
 export class AuthModule {}

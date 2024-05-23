@@ -10,5 +10,5 @@ export abstract class ChangePasswordDto extends PasswordsDto {
   })
   @IsString()
   @IsOptional()
-  public password?: string;
+  public password!: string;
 }

@@ -11,8 +11,8 @@ import { validate } from 'class-validator';
 import { isNull, isUndefined } from './utils/validation.util';
 import slugify from 'slugify';
 import { v4 } from 'uuid';
-import { IMessage } from '../config/interfaces/message.interface';
 import { Repository } from 'typeorm';
+import { IMessage } from './interfaces/message.interface';
 
 @Injectable()
 export class CommonService {

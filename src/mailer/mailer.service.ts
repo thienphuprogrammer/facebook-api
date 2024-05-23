@@ -2,11 +2,12 @@ import { Injectable, Logger, LoggerService } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config/dist';
 import { createTransport, Transporter } from 'nodemailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
-import { IEmailConfig } from '../jwt/interfaces';
 import { ITemplatedData } from './interface/template-data.interface';
 import { readFileSync } from 'fs';
 import { ITemplates } from './interface/templates.interface';
 import { IUsers } from '../users/interfaces';
+import { IEmailConfig } from '../config/interfaces/email-config.interface';
+import Handlebars from 'handlebars';
 
 @Injectable()
 export class MailerService {
@@ -17,7 +18,7 @@ export class MailerService {
   private readonly templates: ITemplates;
 
   constructor(private readonly configService: ConfigService) {
-    const emailConfig = this.configService.get<IEmailConfig>('email');
+    const emailConfig = this.configService.get<IEmailConfig>('emailService');
     this.transport = createTransport(emailConfig);
     this.email = `"My App" <${emailConfig.auth.user}>`;
     this.domain = this.configService.get<string>('domain');
@@ -26,6 +27,7 @@ export class MailerService {
       confirmation: MailerService.parseTemplate('confirmation'),
       resetPassword: MailerService.parseTemplate('reset-password'),
     };
+    console.log('MailerService initialized');
   }
 
   private static parseTemplate(
@@ -35,6 +37,7 @@ export class MailerService {
       [__dirname, 'templates', `${templateName}.hbs`].join('/'),
       'utf8'
     );
+    console.log('Template parsed');
     return Handlebars.compile<ITemplatedData>(templateText);
   }
 

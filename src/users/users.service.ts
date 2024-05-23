@@ -4,8 +4,6 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Not, Repository } from 'typeorm';
 import { isInt, ValidationError } from 'class-validator';
 import { UserDetailsDto } from './dto';
 import { CommonService } from '../common/common.service';
@@ -17,6 +15,8 @@ import { SLUG_REGEX } from '../common/consts/regex.const';
 import { PasswordDto } from './dto/password.dto';
 import { ChangeEmailDto } from './dto/change-email.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Not, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class UsersService {
@@ -226,6 +226,36 @@ export class UsersService {
     const user = await this.findOneByCredentials(userId, version);
     user.credentials.updatePassword(user.password);
     user.password = this.cryptoService.signSomething(password);
+    await this.commonService.saveEntity(this.usersRepository, user);
+    return user;
+  }
+
+  public async updateName(userId: number, name: string): Promise<UsersEntity> {
+    const user = await this.findOneById(userId);
+    const formattedName = this.commonService.formatName(name);
+
+    if (user.name === formattedName) {
+      throw new BadRequestException('Name must be different');
+    }
+
+    user.name = formattedName;
+    await this.commonService.saveEntity(this.usersRepository, user);
+    return user;
+  }
+
+  public async updateUsername(
+    userId: number,
+    username: string
+  ): Promise<UsersEntity> {
+    const user = await this.findOneById(userId);
+    const formattedUsername = username.toLowerCase();
+
+    if (user.username === formattedUsername) {
+      throw new BadRequestException('Username should be different');
+    }
+
+    await this.checkUsernameUniqueness(formattedUsername);
+    user.username = formattedUsername;
     await this.commonService.saveEntity(this.usersRepository, user);
     return user;
   }

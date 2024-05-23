@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker';
 import { IUserDetails } from '../interfaces';
 
 @Entity({ name: 'account_details' })
-export class AccountDetail implements IUserDetails {
+export class UserDetails implements IUserDetails {
   @PrimaryGeneratedColumn()
   public id: number;
 
@@ -54,7 +54,7 @@ export class AccountDetail implements IUserDetails {
   public number_phone: string;
 
   static fakeOne(gender: 'male' | 'female') {
-    const detail = new AccountDetail();
+    const detail = new UserDetails();
     detail.avatar = faker.image.avatar();
     detail.age = faker.number.int({ min: 18, max: 100 });
     detail.birthday = faker.date.past();

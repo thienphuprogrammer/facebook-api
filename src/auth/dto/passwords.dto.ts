@@ -1,8 +1,12 @@
+import { ArgsType, Field, InputType } from '@nestjs/graphql';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, Length, Matches, MinLength } from 'class-validator';
 import { PASSWORD_REGEX } from '../../common/consts/regex.const';
 
+@InputType({ isAbstract: true })
+@ArgsType()
 export abstract class PasswordsDto {
+  @Field(() => String)
   @ApiProperty({
     description: 'New password',
     minLength: 8,
@@ -17,6 +21,7 @@ export abstract class PasswordsDto {
   })
   public password1!: string;
 
+  @Field(() => String)
   @ApiProperty({
     description: 'Password confirmation',
     minLength: 1,

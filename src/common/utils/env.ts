@@ -1,4 +1,5 @@
 import { config } from 'dotenv';
+import { redisUrlParser } from '../../config/utils/redis-url-parser.util';
 
 config();
 
@@ -48,4 +49,9 @@ export class Env {
   static readonly DOMAIN = process.env.DOMAIN || 'localhost:3000';
   static readonly NODE_ENV = process.env.NODE_ENV || 'development';
   static readonly APP_ID = process.env.APP_ID || 'app';
+  // Throttler
+  static readonly THROTTLE_TTL = parseInt(process.env.THROTTLE_TTL) || 60;
+  static readonly THROTTLE_LIMIT = parseInt(process.env.THROTTLE_LIMIT) || 10;
+  // Redis
+  static readonly REDIS_URL = redisUrlParser(process.env.REDIS_URL);
 }

@@ -10,14 +10,19 @@ import { RoleEnum } from '../../common/utils';
 import { IUsers, IUserDetails } from '../interfaces';
 import { CredentialsEmbeddable } from './credentials.entity';
 import { IsBoolean, IsEmail, IsString, Length, Matches } from 'class-validator';
-import { AccountDetail } from './user-details.entity';
+import { UserDetails } from './user-details.entity';
 import { NAME_REGEX, SLUG_REGEX } from '../../common/consts/regex.const';
+import { Directive, Field, Int, ObjectType } from '@nestjs/graphql';
 
+@ObjectType('User')
+@Directive(`@key(fields: "id")`)
 @Entity({ name: 'users' })
 export class UsersEntity implements IUsers {
+  @Field(() => Int)
   @PrimaryGeneratedColumn()
   public id: number;
 
+  @Field(() => String)
   @Column({
     type: 'varchar',
     length: 256,
@@ -28,6 +33,7 @@ export class UsersEntity implements IUsers {
   @IsEmail()
   public email: string;
 
+  @Field(() => String)
   @Column({
     type: 'text',
     length: 60,
@@ -38,6 +44,7 @@ export class UsersEntity implements IUsers {
   })
   public name: string;
 
+  @Field(() => String)
   @Column({
     type: 'varchar',
     length: 106,
@@ -50,12 +57,14 @@ export class UsersEntity implements IUsers {
   })
   public username: string;
 
+  @Field(() => String)
   @Column({
     type: 'text',
   })
   @IsString()
   public password: string;
 
+  @Field()
   @Column({
     type: 'enum',
     enum: RoleEnum,
@@ -63,18 +72,22 @@ export class UsersEntity implements IUsers {
   })
   public role: RoleEnum;
 
-  @OneToOne(() => AccountDetail, {
+  @Field(() => UserDetails)
+  @Column(() => UserDetails, {})
+  @OneToOne(() => UserDetails, {
     cascade: true,
     eager: true,
     nullable: true,
     orphanedRowAction: 'delete',
   })
   @JoinColumn()
-  public detail: IUserDetails;
+  public detail: IUserDetails = new UserDetails();
 
+  @Field(() => CredentialsEmbeddable)
   @Column(() => CredentialsEmbeddable, {})
   public credentials: CredentialsEmbeddable = new CredentialsEmbeddable();
 
+  @Field(() => Boolean)
   @Column({
     type: 'boolean',
     default: false,
@@ -82,12 +95,14 @@ export class UsersEntity implements IUsers {
   @IsBoolean()
   public confirmed: boolean;
 
+  @Field(() => Date)
   @Column({
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',
   })
   public createdAt: Date;
 
+  @Field(() => Date)
   @Column({
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',
@@ -100,7 +115,7 @@ export class UsersEntity implements IUsers {
     user.email = faker.internet.email();
     user.password = faker.internet.password();
     user.role = RoleEnum.USER;
-    user.detail = AccountDetail.fakeOne(
+    user.detail = UserDetails.fakeOne(
       faker.helpers.arrayElement(['male', 'female'])
     );
     user.confirmed = faker.datatype.boolean();

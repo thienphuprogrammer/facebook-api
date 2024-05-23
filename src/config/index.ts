@@ -1,7 +1,6 @@
 import { IConfig } from './interfaces/config.interface';
 import { readFileSync } from 'fs';
 import { Env } from 'src/common/utils';
-import { datasource } from '../db/datasource';
 
 export function config(): IConfig {
   const publicKey = readFileSync(
@@ -12,6 +11,8 @@ export function config(): IConfig {
     [__dirname, '..', '..', 'keys/private.pem'].join('/'),
     'utf8'
   );
+
+  const testing = Env.NODE_ENV !== 'production';
 
   return {
     id: Env.APP_ID,
@@ -45,6 +46,11 @@ export function config(): IConfig {
         pass: Env.EMAIL_PASSWORD,
       },
     },
-    db: datasource,
+    redis: Env.REDIS_URL,
+    throttler: {
+      ttl: Env.THROTTLE_TTL,
+      limit: Env.THROTTLE_LIMIT,
+    },
+    testing,
   };
 }

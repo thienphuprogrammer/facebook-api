@@ -4,9 +4,7 @@ import { generateKeyPairSync } from 'node:crypto';
 import * as fs from 'fs';
 import { Env } from '../common/utils';
 
-@Module({
-  providers: [CryptoService],
-})
+@Module({})
 export class CryptoModule {
   static generateKeyPair(
     keysDir: string,
