@@ -9,8 +9,11 @@ import {
 } from 'class-validator';
 import { UserDetailsDto } from './user-details.dto';
 import { Type } from 'class-transformer';
+import { ArgsType, Field } from '@nestjs/graphql';
 
+@ArgsType()
 export abstract class CreateUserDto {
+  @Field(() => String)
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
@@ -18,6 +21,7 @@ export abstract class CreateUserDto {
   @IsOptional()
   email: string;
 
+  @Field(() => String)
   @ApiProperty()
   @IsString()
   @IsStrongPassword()
@@ -25,6 +29,7 @@ export abstract class CreateUserDto {
   @MaxLength(50)
   password: string;
 
+  @Field(() => UserDetailsDto)
   @ApiProperty({ type: UserDetailsDto, required: false })
   @IsOptional()
   @ValidateNested()

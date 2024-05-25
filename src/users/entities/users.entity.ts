@@ -72,18 +72,17 @@ export class UsersEntity implements IUsers {
   })
   public role: RoleEnum;
 
-  @Field(() => UserDetails)
-  @Column(() => UserDetails, {})
-  @OneToOne(() => UserDetails, {
-    cascade: true,
-    eager: true,
-    nullable: true,
-    orphanedRowAction: 'delete',
-  })
-  @JoinColumn()
-  public detail: IUserDetails = new UserDetails();
+  // @Field(() => UserDetails)
+  // @Column(() => UserDetails, {})
+  // @OneToOne(() => UserDetails, {
+  //   cascade: true,
+  //   eager: true,
+  //   nullable: true,
+  //   orphanedRowAction: 'delete',
+  // })
+  // @JoinColumn()
+  // public detail: IUserDetails = new UserDetails();
 
-  @Field(() => CredentialsEmbeddable)
   @Column(() => CredentialsEmbeddable, {})
   public credentials: CredentialsEmbeddable = new CredentialsEmbeddable();
 
@@ -115,9 +114,9 @@ export class UsersEntity implements IUsers {
     user.email = faker.internet.email();
     user.password = faker.internet.password();
     user.role = RoleEnum.USER;
-    user.detail = UserDetails.fakeOne(
-      faker.helpers.arrayElement(['male', 'female'])
-    );
+    // user.detail = UserDetails.fakeOne(
+    //   faker.helpers.arrayElement(['male', 'female'])
+    // );
     user.confirmed = faker.datatype.boolean();
     user.createdAt = faker.date.recent();
     user.updatedAt = faker.date.recent();

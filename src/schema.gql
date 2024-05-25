@@ -1,0 +1,75 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Auth {
+  accessToken: String!
+  user: User!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Message {
+  id: String!
+  message: String!
+}
+
+type Mutation {
+  confirmEmail(confirmationToken: String!): Auth!
+  deleteUser(password: String!): Message!
+  forgotPassword(email: String!): Message!
+  logout: Message!
+  refreshAccess: Auth!
+  resetPassword(input: ResetPasswordInput!): Message!
+  signIn(input: SignInInput!): Auth!
+  signUp(input: SignUpInput!): Message!
+  updatePassword(input: UpdatePasswordInput!): Auth!
+  updateUserEmail(email: String!, password: String!): User!
+  updateUserName(name: String!): User!
+  updateUserUsername(username: String!): User!
+}
+
+type Query {
+  me: User!
+  userById(id: Int!): User!
+  userByUsername(username: String!): User!
+}
+
+input ResetPasswordInput {
+  password1: String!
+  password2: String!
+  resetToken: String!
+}
+
+input SignInInput {
+  emailOrUsername: String!
+  password: String!
+}
+
+input SignUpInput {
+  email: String!
+  name: String!
+  password1: String!
+  password2: String!
+}
+
+input UpdatePasswordInput {
+  password: String!
+  password1: String!
+  password2: String!
+}
+
+type User {
+  confirmed: Boolean!
+  createdAt: DateTime!
+  email: String!
+  id: Int!
+  name: String!
+  password: String!
+  role: String!
+  updatedAt: DateTime!
+  username: String!
+}

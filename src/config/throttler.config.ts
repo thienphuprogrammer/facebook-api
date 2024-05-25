@@ -12,10 +12,6 @@ export class ThrottlerConfig implements ThrottlerOptionsFactory {
   constructor(private readonly configService: ConfigService) {}
 
   createThrottlerOptions(): ThrottlerModuleOptions {
-    console.log('ThrottlerConfig -> createThrottlerOptions -> testing');
-    console.log(this.configService.get<boolean>('testing'));
-    console.log('ThrottlerConfig -> createThrottlerOptions -> throttler');
-    console.log(this.configService.get<ThrottlerModuleOptions>('throttler'));
     return this.configService.get<boolean>('testing')
       ? this.configService.get<ThrottlerModuleOptions>('throttler')
       : {

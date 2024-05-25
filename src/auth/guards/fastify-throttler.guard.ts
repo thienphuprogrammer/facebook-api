@@ -9,11 +9,6 @@ export class FastifyThrottlerGuard extends ThrottlerGuard {
     res: FastifyReply;
   } {
     const http = context.switchToHttp();
-    console.log(
-      'FastifyThrottlerGuard -> getRequestResponse -> context',
-      http.getRequest<FastifyRequest>(),
-      http.getResponse<FastifyReply>()
-    );
     return {
       req: http.getRequest<FastifyRequest>(),
       res: http.getResponse<FastifyReply>(),

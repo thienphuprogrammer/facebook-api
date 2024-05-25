@@ -8,7 +8,7 @@ export interface IUsers {
   name: string;
   username: string;
   role: RoleEnum;
-  detail: any;
+  // detail: any;
   confirmed: boolean;
   createdAt: Date;
   updatedAt: Date;

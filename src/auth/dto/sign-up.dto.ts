@@ -1,15 +1,12 @@
-``; /*
-  Free and Open Source - GNU LGPLv3
-  Copyright © 2023
-  Afonso Barracha
-*/
-
+import { ArgsType, Field } from '@nestjs/graphql';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsString, Length, Matches } from 'class-validator';
 import { NAME_REGEX } from '../../common/consts/regex.const';
 import { PasswordsDto } from './passwords.dto';
 
+@ArgsType()
 export abstract class SignUpDto extends PasswordsDto {
+  @Field(() => String)
   @ApiProperty({
     description: 'The user name',
     minLength: 3,
@@ -25,6 +22,7 @@ export abstract class SignUpDto extends PasswordsDto {
   })
   public name!: string;
 
+  @Field(() => String)
   @ApiProperty({
     description: 'The user email',
     example: 'example@gmail.com',

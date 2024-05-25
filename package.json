@@ -23,6 +23,7 @@
     "@apollo/federation": "^0.38.1",
     "@apollo/server": "^4.10.4",
     "@apollo/subgraph": "^2.7.8",
+    "@as-integrations/fastify": "^2.1.1",
     "@faker-js/faker": "^8.4.1",
     "@fastify/cookie": "^9.3.1",
     "@fastify/cors": "^9.0.1",

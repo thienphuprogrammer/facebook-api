@@ -3,8 +3,11 @@ import { IsString, Length, Matches, ValidateIf } from 'class-validator';
 import { NAME_REGEX, SLUG_REGEX } from '../../common/consts/regex.const';
 import { isUndefined } from '@nestjs/common/utils/shared.utils';
 import { isNull } from '../../common/utils/validation.util';
+import { ArgsType, Field } from '@nestjs/graphql';
 
+@ArgsType()
 export abstract class UpdateUserDto {
+  @Field(() => String, { nullable: true })
   @ApiProperty({
     description: 'The new username',
     example: 'new-username',
@@ -21,6 +24,7 @@ export abstract class UpdateUserDto {
   )
   public username?: string;
 
+  @Field(() => String, { nullable: true })
   @ApiProperty({
     description: 'The new name',
     example: 'John Doe',

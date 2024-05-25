@@ -29,32 +29,32 @@ export class UsersService {
     private readonly commonService: CommonService
   ) {}
 
-  async validateDetail(
-    detail: UserDetailsDto,
-    userId?: number
-  ): Promise<ValidationError[]> {
-    const errors: Array<ValidationError> = [];
-    const result = await Promise.all([
-      userId
-        ? this.usersRepository.exists({
-            where: {
-              id: Not(Number(userId)),
-              detail: { number_phone: detail.number_phone },
-            },
-          })
-        : this.usersRepository.exists({
-            where: { detail: { number_phone: detail.number_phone } },
-          }),
-    ]);
-
-    if (result[0]) {
-      const error = new ValidationError();
-      error.property = 'number_phone';
-      error.constraints = { isUnique: 'number_phone already exists' };
-      errors.push(error);
-    }
-    return errors;
-  }
+  // async validateDetail(
+  //   detail: UserDetailsDto,
+  //   userId?: number
+  // ): Promise<ValidationError[]> {
+  //   const errors: Array<ValidationError> = [];
+  //   const result = await Promise.all([
+  //     userId
+  //       ? this.usersRepository.exists({
+  //           where: {
+  //             id: Not(Number(userId)),
+  //             detail: { number_phone: detail.number_phone },
+  //           },
+  //         })
+  //       : this.usersRepository.exists({
+  //           where: { detail: { number_phone: detail.number_phone } },
+  //         }),
+  //   ]);
+  //
+  //   if (result[0]) {
+  //     const error = new ValidationError();
+  //     error.property = 'number_phone';
+  //     error.constraints = { isUnique: 'number_phone already exists' };
+  //     errors.push(error);
+  //   }
+  //   return errors;
+  // }
 
   public async create(
     email: string,
