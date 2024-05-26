@@ -34,6 +34,7 @@ import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { IAuthResult } from './interfaces/auth-result.interface';
 import { CACHE_MANAGER } from '@nestjs/common/cache';
+import { OAuthProvidersEnum } from '../users/enums/oauth-providers.enum';
 
 @Injectable()
 export class AuthService {
@@ -49,7 +50,12 @@ export class AuthService {
   public async signUp(dto: SignUpDto, domain?: string): Promise<IMessage> {
     const { name, email, password1, password2 } = dto;
     this.comparePasswords(password1, password2);
-    const user = await this.usersService.create(email, name, password1);
+    const user = await this.usersService.create(
+      OAuthProvidersEnum.LOCAL,
+      email,
+      name,
+      password1
+    );
     const confirmationToken = await this.jwtService.generateToken(
       user,
       TokenTypeEnum.CONFIRMATION,
@@ -69,10 +75,8 @@ export class AuthService {
       TokenTypeEnum.CONFIRMATION
     );
     const user = await this.usersService.confirmEmail(id, version);
-    const [accessToken, refreshToken] = await this.generateAuthTokens(
-      user,
-      domain
-    );
+    const [accessToken, refreshToken] =
+      await this.jwtService.generateAuthTokens(user, domain);
     return { user, accessToken, refreshToken };
   }
 
@@ -95,10 +99,8 @@ export class AuthService {
       );
     }
 
-    const [accessToken, refreshToken] = await this.generateAuthTokens(
-      user,
-      domain
-    );
+    const [accessToken, refreshToken] =
+      await this.jwtService.generateAuthTokens(user, domain);
     return { user, accessToken, refreshToken };
   }
 
@@ -113,11 +115,8 @@ export class AuthService {
       );
     await this.checkIfTokenIsBlacklisted(id, tokenId);
     const user = await this.usersService.findOneByCredentials(id, version);
-    const [accessToken, newRefreshToken] = await this.generateAuthTokens(
-      user,
-      domain,
-      tokenId
-    );
+    const [accessToken, newRefreshToken] =
+      await this.jwtService.generateAuthTokens(user, domain, tokenId);
     return { user, accessToken, refreshToken: newRefreshToken };
   }
 
@@ -169,13 +168,11 @@ export class AuthService {
     this.comparePasswords(password1, password2);
     const user = await this.usersService.updatePassword(
       userId,
-      password,
-      password1
+      password1,
+      password
     );
-    const [accessToken, refreshToken] = await this.generateAuthTokens(
-      user,
-      domain
-    );
+    const [accessToken, refreshToken] =
+      await this.jwtService.generateAuthTokens(user, domain);
     return { user, accessToken, refreshToken };
   }
 

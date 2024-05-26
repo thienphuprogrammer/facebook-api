@@ -4,10 +4,9 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { isInt, ValidationError } from 'class-validator';
-import { UserDetailsDto } from './dto';
+import { isInt } from 'class-validator';
 import { CommonService } from '../common/common.service';
-import { UsersEntity } from './entities';
+import { CredentialsEmbeddable, UsersEntity } from './entities';
 import { isNull, isUndefined } from '../common/utils/validation.util';
 import { compare } from 'bcrypt';
 import { CryptoService } from '@crypto';
@@ -15,8 +14,10 @@ import { SLUG_REGEX } from '../common/consts/regex.const';
 import { PasswordDto } from './dto/password.dto';
 import { ChangeEmailDto } from './dto/change-email.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Not, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { OAuthProviderEntity } from './entities/oauth-provider.entity';
+import { OAuthProvidersEnum } from './enums/oauth-providers.enum';
 
 @Injectable()
 export class UsersService {
@@ -26,6 +27,8 @@ export class UsersService {
     private readonly usersRepository: Repository<UsersEntity>,
     // @InjectRepository(AccountDetail)
     // private readonly accountDetailRepository: Repository<IUserDetails>,
+    @InjectRepository(OAuthProviderEntity)
+    private readonly oauthProvidersRepository: Repository<OAuthProviderEntity>,
     private readonly commonService: CommonService
   ) {}
 
@@ -57,10 +60,12 @@ export class UsersService {
   // }
 
   public async create(
+    provider: OAuthProvidersEnum,
     email: string,
     name: string,
-    password: string
+    password?: string
   ): Promise<UsersEntity> {
+    const isConfirmed = provider !== OAuthProvidersEnum.LOCAL;
     const formattedEmail = email.toLowerCase();
     await this.checkEmailUniqueness(formattedEmail);
     const formattedName = this.commonService.formatName(name);
@@ -69,8 +74,11 @@ export class UsersService {
       name: formattedName,
       username: await this.generateUsername(formattedName),
       password: this.cryptoService.signSomething(password),
+      confirmed: isConfirmed,
+      credentials: new CredentialsEmbeddable(isConfirmed),
     });
     await this.commonService.saveEntity(this.usersRepository, user, true);
+    await this.createOAuthProvider(provider, user.id);
     return user;
   }
 
@@ -200,16 +208,23 @@ export class UsersService {
 
   public async updatePassword(
     userId: number,
-    password: string,
-    newPassword: string
+    newPassword: string,
+    password?: string
   ): Promise<UsersEntity> {
     const user = await this.findOneById(userId);
 
-    if (!(await compare(password, user.password))) {
-      throw new BadRequestException('Wrong password');
-    }
-    if (await compare(newPassword, user.password)) {
-      throw new BadRequestException('New password must be different');
+    if (user.password === 'UNSET') {
+      await this.createOAuthProvider(OAuthProvidersEnum.LOCAL, user.id);
+    } else {
+      if (isUndefined(password) || isNull(password)) {
+        throw new BadRequestException('Password is required');
+      }
+      if (!(await compare(password, user.password))) {
+        throw new BadRequestException('Wrong password');
+      }
+      if (await compare(newPassword, user.password)) {
+        throw new BadRequestException('New password must be different');
+      }
     }
 
     user.credentials.updatePassword(user.password);
@@ -333,6 +348,68 @@ export class UsersService {
     }
 
     return pointSlug;
+  }
+  private async createOAuthProvider(
+    provider: OAuthProvidersEnum,
+    userId: number
+  ): Promise<OAuthProviderEntity> {
+    const oauthProvider = this.oauthProvidersRepository.create({
+      provider,
+      user: { id: userId },
+    });
+
+    await this.commonService.saveEntity(
+      this.oauthProvidersRepository,
+      oauthProvider,
+      true
+    );
+    return oauthProvider;
+  }
+
+  public async findOrCreate(
+    provider: OAuthProvidersEnum,
+    email: string,
+    name: string
+  ): Promise<UsersEntity> {
+    const formattedEmail = email.toLowerCase();
+    const user = await this.usersRepository.findOne({
+      where: { email: formattedEmail },
+    });
+
+    if (isUndefined(user) || isNull(user)) {
+      return this.create(provider, email, name);
+    }
+    if (
+      isUndefined(
+        user.oauthProviders.find(
+          (p) => p.provider === provider && p.user.id === user.id
+        )
+      )
+    ) {
+      await this.createOAuthProvider(provider, user.id);
+    }
+
+    return user;
+  }
+
+  private async changePassword(
+    user: UsersEntity,
+    password: string
+  ): Promise<UsersEntity> {
+    user.credentials.updatePassword(user.password);
+    user.password = this.cryptoService.signSomething(password);
+    await this.commonService.saveEntity(this.usersRepository, user);
+    return user;
+  }
+
+  public async findOAuthProviders(
+    userId: number
+  ): Promise<OAuthProviderEntity[]> {
+    // select * from oauth_provider where user_id = userId order by QueryOrder desc
+    return await this.oauthProvidersRepository.find({
+      where: { user: { id: userId } },
+      order: { createdAt: 'DESC' },
+    });
   }
 
   async fake100() {

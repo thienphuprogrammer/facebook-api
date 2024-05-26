@@ -54,4 +54,15 @@ export class Env {
   static readonly THROTTLE_LIMIT = parseInt(process.env.THROTTLE_LIMIT) || 10;
   // Redis
   static readonly REDIS_URL = redisUrlParser(process.env.REDIS_URL);
+  // OAuth2
+  static readonly MICROSOFT_CLIENT_ID = process.env.MICROSOFT_CLIENT_ID;
+  static readonly MICROSOFT_CLIENT_SECRET = process.env.MICROSOFT_CLIENT_SECRET;
+  static readonly GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+  static readonly GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+  static readonly FACEBOOK_CLIENT_ID = process.env.FACEBOOK_CLIENT_ID;
+  static readonly FACEBOOK_CLIENT_SECRET = process.env.FACEBOOK_CLIENT_SECRET;
+  static readonly GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
+  static readonly GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
+  // URL
+  static readonly URL = process.env.URL || 'http://localhost:3000';
 }

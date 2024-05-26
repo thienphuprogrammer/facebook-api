@@ -15,6 +15,7 @@ import { GraphQLConfig } from './config/graph-ql.config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { CacheModule } from '@nestjs/common/cache';
+import { Oauth2Module } from './oauth2/oauth2.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { CacheModule } from '@nestjs/common/cache';
     CommonModule,
     MailerModule,
     CryptoModule,
+    Oauth2Module,
   ],
   controllers: [],
   providers: [

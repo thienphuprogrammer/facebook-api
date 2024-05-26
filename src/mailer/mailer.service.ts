@@ -27,7 +27,6 @@ export class MailerService {
       confirmation: MailerService.parseTemplate('confirmation'),
       resetPassword: MailerService.parseTemplate('reset-password'),
     };
-    console.log('MailerService initialized');
   }
 
   private static parseTemplate(
@@ -37,7 +36,6 @@ export class MailerService {
       [__dirname, 'templates', `${templateName}.hbs`].join('/'),
       'utf8'
     );
-    console.log('Template parsed');
     return Handlebars.compile<ITemplatedData>(templateText);
   }
 

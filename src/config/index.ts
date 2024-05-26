@@ -1,6 +1,7 @@
 import { IConfig } from './interfaces/config.interface';
 import { readFileSync } from 'fs';
 import { Env } from 'src/common/utils';
+import { isUndefined } from '../common/utils/validation.util';
 
 export function config(): IConfig {
   const publicKey = readFileSync(
@@ -47,10 +48,47 @@ export function config(): IConfig {
       },
     },
     redis: Env.REDIS_URL,
-    throttler: {
-      ttl: Env.THROTTLE_TTL,
-      limit: Env.THROTTLE_LIMIT,
-    },
+    throttler: [
+      {
+        ttl: Env.THROTTLE_TTL,
+        limit: Env.THROTTLE_LIMIT,
+      },
+    ],
     testing,
+    url: Env.URL,
+    oauth2: {
+      microsoft:
+        isUndefined(Env.MICROSOFT_CLIENT_ID) ||
+        isUndefined(Env.MICROSOFT_CLIENT_SECRET)
+          ? null
+          : {
+              id: Env.MICROSOFT_CLIENT_ID,
+              secret: Env.MICROSOFT_CLIENT_SECRET,
+            },
+      google:
+        isUndefined(Env.GOOGLE_CLIENT_ID) ||
+        isUndefined(Env.GOOGLE_CLIENT_SECRET)
+          ? null
+          : {
+              id: Env.GOOGLE_CLIENT_ID,
+              secret: Env.GOOGLE_CLIENT_SECRET,
+            },
+      facebook:
+        isUndefined(Env.FACEBOOK_CLIENT_ID) ||
+        isUndefined(Env.FACEBOOK_CLIENT_SECRET)
+          ? null
+          : {
+              id: Env.FACEBOOK_CLIENT_ID,
+              secret: Env.FACEBOOK_CLIENT_SECRET,
+            },
+      github:
+        isUndefined(Env.GITHUB_CLIENT_ID) ||
+        isUndefined(Env.GITHUB_CLIENT_SECRET)
+          ? null
+          : {
+              id: Env.GITHUB_CLIENT_ID,
+              secret: Env.GITHUB_CLIENT_SECRET,
+            },
+    },
   };
 }

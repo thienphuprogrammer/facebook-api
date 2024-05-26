@@ -1,7 +1,9 @@
 import {
+  Collection,
   Column,
   Entity,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -13,6 +15,7 @@ import { IsBoolean, IsEmail, IsString, Length, Matches } from 'class-validator';
 import { UserDetails } from './user-details.entity';
 import { NAME_REGEX, SLUG_REGEX } from '../../common/consts/regex.const';
 import { Directive, Field, Int, ObjectType } from '@nestjs/graphql';
+import { OAuthProviderEntity } from './oauth-provider.entity';
 
 @ObjectType('User')
 @Directive(`@key(fields: "id")`)
@@ -108,6 +111,9 @@ export class UsersEntity implements IUsers {
     onUpdate: 'CURRENT_TIMESTAMP',
   })
   public updatedAt: Date;
+
+  @OneToMany(() => OAuthProviderEntity, (oauthProvider) => oauthProvider.user)
+  public oauthProviders = new Collection<OAuthProviderEntity>();
 
   static fakeOne(): UsersEntity {
     const user = new UsersEntity();

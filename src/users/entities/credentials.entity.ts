@@ -34,6 +34,10 @@ export class CredentialsEmbeddable implements ICredentials {
   })
   public version: number = 0;
 
+  constructor(isConfirmed = false) {
+    this.version = isConfirmed ? 1 : 0;
+  }
+
   public updatePassword(password: string): void {
     this.version++;
     this.lastPassword = password;

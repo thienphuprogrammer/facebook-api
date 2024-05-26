@@ -42,7 +42,7 @@ import { AuthResponseMapper } from './mappers/auth-response.mapper';
 
 @ApiTags('Auth')
 @Controller('api/auth')
-// @UseGuards(FastifyThrottlerGuard)
+@UseGuards(FastifyThrottlerGuard)
 export class AuthController {
   private readonly cookiePath = '/api/auth';
   private readonly cookieName: string;
